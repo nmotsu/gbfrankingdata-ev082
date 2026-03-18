@@ -2048,7 +2048,7 @@ async function renderGraph() {
       pointRadius: ptRadius,
       pointHoverRadius: ptHoverR,
       tension: isRank ? 0 : 0.3,
-      spanGaps: true,
+      spanGaps: yKey === 'honor',
       borderWidth: 2,
     });
 
