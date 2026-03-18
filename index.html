@@ -705,13 +705,15 @@
 
 <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako_inflate.min.js"></script>
 <script>
-(function(){
-var s=atob('H4sIAAAAAAACCpXTzWrCQBAA4FeROSe4s5q/hdIHKRKW7FJDdSPJRigi2FO99diL0FJKKfTSQy4+T4mlb1GSqPgTNN6WYWdnP2ZmAm0+CtsxV3ehum3LsVQ6AXYzgVAAsw1QfCiBASXUzpcZ6a4W85/ZbPWd5U/vq/lH/pqBAWWaH0SiuKolH8Y8FMSlYECieax9wfXmFZN0TWIXSUocxrHI4IEOxxIYGhDEkmspfK63lzom0hbaDD1GHDAgTHwhhxEwUp77oRBSAcOpURGsIwJWhHzx0oCA9QQ0KdYR0KTODoGcJriMniCQDaGzS7DyZYZrwt/bZwMCqSFYJtYSqvgFBIeh3YDQPSQQb014fjxPcLxaAvHMcgQOCcQzsXMJwaINCHhEsCvC78NXA4JbT7Dru1DEL+iCdYbQM/bXPFF8lPQjnVxXvw3Flb1denSIa0DARzqN9+sVi9sqFo8yUkzVaMDvZewHUap0WTSJ0jgoEEOuUj6AaW/6D6A6tmphBAAA'),u=new Uint8Array(s.length);
-for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
-window.__STATIC_CACHE__=JSON.parse(pako.inflate(u,{to:'string'}));
 window.__STATIC_MODE__=true;
 window.__STATIC_EVENT_URLS__={"1":"https://ev078.gbfranking.com/","3":"https://ev080.gbfranking.com/","4":"https://ev079.gbfranking.com/","5":"https://ev081.gbfranking.com/","6":"https://ev082.gbfranking.com/","7":"https://ev000.gbfranking.com/"};
 window.__STATIC_INDEX_URL__='https://gbfranking.com/';
+(function(){
+try{
+var s=atob('H4sIAAAAAAACCpXT3UrDMBQH8FcZ5zplSbd+BcQHkVFCE1xwTUuSDmQM5pW789KbgSIigre72fNIJ76FtJ3DucK625N/Pn6cnBn0WS77mqkbqa77YiqUNUCvZiA5UA+BYqkACi52/XKzxmS7Wn4uFuXqqXx43S7fyuc1IKi3xUnGq6gVLNVMchwSQGAs0zbmzP6e4mDiuNWKUPyoHgACllg5FUAxgkQLZgWPmd2HBg5xe8SnJKR1WpqYizSr49LEY8m5UEDxHDWEwV+CV27WZEf4fnnvQMAtBM8hrYSmfgYhoMTvQBj+J+BoR3i8P00IolYCjhwctBBw5JDBOQTP7UAgRwS/IXzdfXQghO0Ev70LVf2MLngnCCN0OCNGsdyMM2sum9dKfuHvJ4YEOESQsNwW+vC+oYP9HokodimuflU+YbdCx0lWKFtfarJCJxUiZapgE5iP5j+W43O1ngMAAA=='),u=new Uint8Array(s.length);
+for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
+window.__STATIC_CACHE__=JSON.parse(pako.inflate(u,{to:'string'}));
+}catch(e){window.__STATIC_CACHE__={};console.warn('GBF: データ読み込み失敗（広告ブロッカーが原因の可能性）',e);}
 })();
 </script>
 <script>
@@ -1135,11 +1137,12 @@ async function init() {
   startAutoRefresh();
   connectLiveSSE();
   if (window.__STATIC_MODE__) {
-    document.getElementById('snap-day-auto-label').textContent  = '-- 全日 --';
-    document.getElementById('snap-time-auto-label').textContent = '-- 最新 --';
-    document.getElementById('snap-clear-btn').title             = '最新に戻す';
-    document.getElementById('last-update').style.display        = 'none';
-    document.getElementById('viewer-badge').style.display       = 'none';
+    const _el = (id) => document.getElementById(id);
+    if (_el('snap-day-auto-label'))  _el('snap-day-auto-label').textContent  = '-- 全日 --';
+    if (_el('snap-time-auto-label')) _el('snap-time-auto-label').textContent = '-- 最新 --';
+    if (_el('snap-clear-btn'))       _el('snap-clear-btn').title             = '最新に戻す';
+    if (_el('last-update'))          _el('last-update').style.display        = 'none';
+    if (_el('viewer-badge'))         _el('viewer-badge').style.display       = 'none';
   }
 }
 
