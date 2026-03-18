@@ -694,11 +694,11 @@
 <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako_inflate.min.js"></script>
 <script>
 (function(){
-var s=atob('H4sIAAAAAAACCrXUQWvbMBQA4L8S3lkmkhPLtmD0h5RiXi11FYtlIymFEgLppc1tx10KHWOMwa697PcMd/RfDMUNSxq39Q67Pp7e0/ce0gLG2OixRfNBm/djdaGMdyCOF6AlCEbAYKVAQEzjpP15T/nD7frXavX76kf78evD+lv7+R4IbI4VZS1DqldYWdSSphkQcB6tLyT6bZWI8ihm4ZCRB/EUCGDp9YUCQQmUVqFXskDfJfGITiIWjxgXLBFJDAS0K6Sq6k26dsW5llIZEHRJOsL0gJB3hMdPNwMIeT8hj2jaR8gjNhlOSIcRJs8JjD0Rvnx/m5DRXgJj/VsI8fRfCIwPICS7BB628ERob+8GEFgPgUe0l9DFdwnsdUImNtkvEk7I/htxBht3Xnt31N1Wy3f874tJaUagxMbP7X6/aUT5iOWCxoKGlTQzvFS2KOu58Zumrp7bMiAqNHOcwXZ2LKV5f8ngHMUTMe0tmWfJTlFdNbX1cKCZoVfO71EW4C+bbprt+vpxdQcETtVZbdWLnfHMK/sGNXwrJ8tn7WNaaXO0HWm4QJjgf77D8g8uc2MK9gQAAA=='),u=new Uint8Array(s.length);
+var s=atob('H4sIAAAAAAACCpXTT2vCMBQA8K8i75ziS7X/AmMfZEgJTZhhmpY2FYYI7jRvO+4ibIwxBrt68fOMOvYtRlsnOsust/DykpcfL28KXZ6obsr1jdLXXTmR2mTArqagBDCHgOZjCQxstN1ivUK6WS4+5/Ni+VQ8vG4Wb8XzCghUx8IoFmWqkXycciXQp0AgMzw1oeDm9xYLqWWXO1KLo7gHBHhk1EQCowSiVHIjRcjNLqlnUbtDXUZ9VmWrLBRyHAPDaj1UQkgNDGekJvT2CU6xXtEt4fvlvQUBGwiORRsJdXyfgP8TPEbdFoT+XwIGW8Lj/WmCFzQSMLDQayBgYNHeOQTHbkGgRwS3JnzdfbQg+M0Et7kLZfyMLjgnCANyOCOZ5kk2jE12Wb9WiQt3NzHUQ59AxBOTp4f1+ha6HRowtBmWvyoZ8VuZhlGca1MVzeI8jUrEmOucj2A2mP0AvdFliJ4DAAA='),u=new Uint8Array(s.length);
 for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
 window.__STATIC_CACHE__=JSON.parse(pako.inflate(u,{to:'string'}));
 window.__STATIC_MODE__=true;
-window.__STATIC_EVENT_URLS__={"1":"https://ev078.gbfranking.com/","3":"https://ev080.gbfranking.com/","4":"https://ev079.gbfranking.com/","5":"https://ev081.gbfranking.com/","6":"https://ev082.gbfranking.com/"};
+window.__STATIC_EVENT_URLS__={"1":"https://ev078.gbfranking.com/","3":"https://ev080.gbfranking.com/","4":"https://ev079.gbfranking.com/","5":"https://ev081.gbfranking.com/","6":"https://ev082.gbfranking.com/","7":"https://ev000.gbfranking.com/"};
 })();
 </script>
 <script>
@@ -1134,7 +1134,7 @@ async function loadEvents() {
   loadedEvents = await apiFetch('/api/ranking/events') || [];
   const sel = document.getElementById('event-select');
   sel.innerHTML = '<option value="">イベント選択</option>';
-  [...loadedEvents].reverse().forEach(e => {
+  loadedEvents.forEach(e => {
     const mark = e.is_demo ? ' [DEMO]' : '';
     sel.innerHTML += `<option value="${e.id}">${escHtml(e.name)}${mark}</option>`;
   });
