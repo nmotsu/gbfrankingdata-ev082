@@ -740,6 +740,7 @@
 window.__STATIC_MODE__=true;
 window.__STATIC_EVENT_URLS__={"1":"https://ev078.gbfranking.com/","3":"https://ev080.gbfranking.com/","4":"https://ev079.gbfranking.com/","5":"https://ev081.gbfranking.com/","6":"https://ev082.gbfranking.com/","7":"https://ev000.gbfranking.com/"};
 window.__STATIC_INDEX_URL__='https://gbfranking.com/';
+window.__STATIC_BORDER_URL__='https://border.gbfranking.com/';
 (function(){
 try{
 var s=atob('H4sIAAAAAAACCpXTwUrDMBgH8FeR75zQpLVpGxAfZIwSmuCCNB1N2GUM5sndPHoZKCIieO1lzyOd+BbSdoq6wtrrP/8v5MdHluCJufZKYa61ufLUQhlngU+WoCXwEIERuQIOPvFZvasI3W837+t1vX2o7573m5f6sQIE7ViaFbKpOiXyUmhJYgoIrBOlS6Vw37dgQrHfnCgjj/IIEIjM6YUCThBkpRJOyVS4n1KAqX9GGacxb9vaplLlRVvXNp1pKZUBTlaoIwS/CWG9q+iB8Pn0OoBAegghpr2ELh9BiDhlAwjn/wkkORDub08ToqSXQBJMoh4CSTANxhBCfwCBHhFYR/i4eRtAiPsJrH8LTT5iC+EJwhT9/SPWiLmdFc5edq/V8oIBn0xXX9Ap94RMAwAA'),u=new Uint8Array(s.length);
@@ -1186,8 +1187,9 @@ async function init() {
     if (_el('snap-clear-btn'))       _el('snap-clear-btn').title             = '最新に戻す';
     if (_el('last-update'))          _el('last-update').style.display        = 'none';
     if (_el('viewer-badge'))         _el('viewer-badge').style.display       = 'none';
-    if (_el('border-page-link'))     _el('border-page-link').href            = './border.html';
-    if (_el('border-header-link'))   _el('border-header-link').href          = './border.html';
+    const borderUrl = window.__STATIC_BORDER_URL__ || './border.html';
+    if (_el('border-page-link'))     _el('border-page-link').href            = borderUrl;
+    if (_el('border-header-link'))   _el('border-header-link').href          = borderUrl;
   }
 }
 
