@@ -218,7 +218,6 @@
       <div style="position:relative">
         <button id="site-menu-btn" onclick="toggleSiteMenu()" style="background:none;border:1px solid #1e1e3a;color:#4a5568;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px;line-height:1">…</button>
         <div id="site-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#0f0f23;border:1px solid #2d2d5e;border-radius:6px;padding:4px 0;z-index:9999;white-space:nowrap;min-width:130px;box-shadow:0 4px 12px #00000066">
-          <a href="/border" id="border-page-link" style="display:block;padding:6px 14px;color:#60a5fa;text-decoration:none;font-size:11px;border-bottom:1px solid #1e1e3f">ボーダー推移</a>
           <a href="#" onclick="openHelpModal();toggleSiteMenu();return false;" style="display:block;padding:6px 14px;color:#94a3b8;text-decoration:none;font-size:11px;border-bottom:1px solid #1e1e3f" class="mobile-only-menu">使い方</a>
           <a href="https://gbfranking.com/privacy.html" target="_blank" style="display:block;padding:6px 14px;color:#64748b;text-decoration:none;font-size:11px">プライバシーポリシー</a>
           <a href="https://gbfranking.com/contact.html" target="_blank" style="display:block;padding:6px 14px;color:#64748b;text-decoration:none;font-size:11px">お問い合わせ</a>
@@ -1188,7 +1187,6 @@ async function init() {
     if (_el('last-update'))          _el('last-update').style.display        = 'none';
     if (_el('viewer-badge'))         _el('viewer-badge').style.display       = 'none';
     const borderUrl = window.__STATIC_BORDER_URL__ || './border.html';
-    if (_el('border-page-link'))     _el('border-page-link').href            = borderUrl;
     if (_el('border-header-link'))   _el('border-header-link').href          = borderUrl;
   }
 }
