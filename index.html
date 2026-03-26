@@ -247,19 +247,10 @@ function ensureChartJs() {
     <input id="date-select" type="date" onchange="onDateChange()" style="display:none">
     <span id="demo-badge" class="demo-badge" style="display:none">DEMO</span>
     <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
-    <div class="ml-auto flex-shrink-0" style="display:flex;gap:4px;align-items:center">
-      <a id="top-back-btn" href="/" style="display:none;background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;white-space:nowrap">TOP</a>
-      <a href="/border" id="border-header-link" style="background:#1a1a3a;border:1px solid #3b82f6;color:#60a5fa;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;text-decoration:none;font-weight:600;white-space:nowrap">ボーダー推移</a>
-      <button id="help-header-btn" onclick="openHelpModal()" style="background:none;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">使い方</button>
-      <div style="position:relative">
-        <button id="site-menu-btn" onclick="toggleSiteMenu()" style="background:none;border:1px solid #1e1e3a;color:#4a5568;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:12px;line-height:1">…</button>
-        <div id="site-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#0f0f23;border:1px solid #2d2d5e;border-radius:6px;padding:4px 0;z-index:9999;white-space:nowrap;min-width:130px;box-shadow:0 4px 12px #00000066">
-          <a href="#" onclick="openHelpModal();toggleSiteMenu();return false;" style="display:block;padding:6px 14px;color:#94a3b8;text-decoration:none;font-size:11px;border-bottom:1px solid #1e1e3f" class="mobile-only-menu">使い方</a>
-          <a href="https://gbfranking.com/privacy.html" target="_blank" style="display:block;padding:6px 14px;color:#64748b;text-decoration:none;font-size:11px">プライバシーポリシー</a>
-          <a href="https://gbfranking.com/contact.html" target="_blank" style="display:block;padding:6px 14px;color:#64748b;text-decoration:none;font-size:11px">お問い合わせ</a>
-          <a href="https://gbfranking.com/about.html" target="_blank" style="display:block;padding:6px 14px;color:#64748b;text-decoration:none;font-size:11px">サイトについて</a>
-        </div>
-      </div>
+    <div class="ml-auto flex-shrink-0" style="display:flex;gap:6px;align-items:center">
+      <a id="top-back-btn" href="/" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;white-space:nowrap">TOP</a>
+      <a href="/border" id="border-header-link" style="background:#1a1a3a;border:1px solid #3b82f6;color:#60a5fa;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;font-weight:600;white-space:nowrap">ボーダー</a>
+      <button id="help-header-btn" onclick="openHelpModal()" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">使い方</button>
     </div>
   </div>
 </div>
@@ -284,8 +275,6 @@ function ensureChartJs() {
         <option value="">イベント選択</option>
       </select>
 
-      <span id="viewer-badge" class="text-xs text-gray-500" style="display:none;flex-shrink:0" title="現在の閲覧者数">閲覧: <span id="viewer-count">1</span></span>
-      <span id="last-update" class="text-xs text-gray-500" style="flex-shrink:0"></span>
     </div>
 
     <!-- 20分速: スナップショット選択 -->
@@ -1243,8 +1232,6 @@ async function init() {
     if (_el('snap-day-auto-label'))  _el('snap-day-auto-label').textContent  = '-- 全日 --';
     if (_el('snap-time-auto-label')) _el('snap-time-auto-label').textContent = '-- 最新 --';
     if (_el('snap-clear-btn'))       _el('snap-clear-btn').title             = '最新に戻す';
-    if (_el('last-update'))          _el('last-update').style.display        = 'none';
-    if (_el('viewer-badge'))         _el('viewer-badge').style.display       = 'none';
     const borderUrl = window.__STATIC_BORDER_URL__ || './border.html';
     if (_el('border-header-link'))   _el('border-header-link').href          = borderUrl;
   }
@@ -1353,17 +1340,7 @@ function connectLiveSSE() {
   liveSSE.onmessage = (e) => {
     try {
       const info = JSON.parse(e.data);
-      if (info.type === 'viewers') {
-        const badge = document.getElementById('viewer-badge');
-        const cnt   = document.getElementById('viewer-count');
-        if (info.count >= 1) {
-          cnt.textContent = info.count;
-          badge.style.display = '';
-        } else {
-          badge.style.display = 'none';
-        }
-        return;
-      }
+      if (info.type === 'viewers') { return; }
       if (currentEventId && String(info.eventId) !== String(currentEventId)) return;
       apiCacheInvalidate('/api/ranking/latest');
       apiCacheInvalidate('/api/ranking/snapshots');
@@ -1735,9 +1712,6 @@ function renderRanking(data) {
       void r.offsetWidth;
       r.classList.add('flashing');
     });
-  }
-  if (!window.__STATIC_MODE__) {
-    document.getElementById('last-update').textContent = '更新: ' + new Date().toLocaleTimeString('ja-JP');
   }
 }
 
