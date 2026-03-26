@@ -248,7 +248,7 @@ function ensureChartJs() {
     <span id="demo-badge" class="demo-badge" style="display:none">DEMO</span>
     <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
     <div class="ml-auto flex-shrink-0" style="display:flex;gap:6px;align-items:center">
-      <a id="top-back-btn" href="/" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;white-space:nowrap">TOP</a>
+      <a href="/border" id="border-header-link" style="background:#1a1a3a;border:1px solid #3b82f6;color:#60a5fa;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;font-weight:600;white-space:nowrap">ボーダー</a>
       <button id="help-header-btn" onclick="openHelpModal()" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">使い方</button>
     </div>
   </div>
@@ -1190,12 +1190,10 @@ async function init() {
   renderColgroup();
   renderThead();
 
-  // ヘッダーのホームリンクを静的モード用URLに更新 / TOPボタン表示
+  // 静的モード: ヘッダーホームリンクを更新
   if (window.__STATIC_INDEX_URL__) {
     const hl = document.getElementById('header-home-link');
     if (hl) hl.href = window.__STATIC_INDEX_URL__;
-    const tb = document.getElementById('top-back-btn');
-    if (tb) { tb.href = window.__STATIC_INDEX_URL__; tb.style.display = ''; }
   }
 
   await loadEvents();
