@@ -232,6 +232,10 @@ function ensureChartJs() {
   .side-card-value { font-size: 13px; font-weight: 700; color: #e2e8f0; font-variant-numeric: tabular-nums; }
   .side-card-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
   .side-elem-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-top: 4px; }
+  .cell-r { text-align: right }
+  .cell-rank { text-align: right; color: #64748b; font-size: 11px }
+  .cell-kill { text-align: right; color: #64748b; font-size: 12px }
+  .cell-total { font-size: 13px; color: #94a3b8 }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
 </head>
@@ -796,7 +800,7 @@ window.__STATIC_CACHE__=JSON.parse(pako.inflate(u,{to:'string'}));
 })();
 </script>
 <script>
-(function(){var n=function(){};console.log=n;console.warn=n;console.info=n;console.debug=n;console.table=n;console.dir=n;})();
+
 let currentTab         = '20min';
 let currentEventId     = null;
 let currentDate        = null;
@@ -1214,7 +1218,6 @@ async function init() {
   if (defaultEvent) {
     document.getElementById('event-select').value = defaultEvent.id;
     currentEventId = defaultEvent.id;
-    updateEventLabel(defaultEvent);
     applyEventDateRange(defaultEvent);
     updateDemoState(defaultEvent);
     applyElementTheme(defaultEvent.name || '');
@@ -1265,8 +1268,6 @@ async function loadEvents() {
   });
 }
 
-function updateEventLabel(event) {
-}
 
 const ELEMENT_THEMES = {
   '火': { color: '#ef4444', light: '#f87171' },
@@ -1546,7 +1547,6 @@ function onEventChange() {
 
   const event = loadedEvents.find(e => String(e.id) === String(currentEventId));
   if (event) {
-    updateEventLabel(event);
     applyEventDateRange(event);
     updateDemoState(event);
     applyElementTheme(event.name || '');
@@ -1572,9 +1572,6 @@ async function updateSnapList() {
 
   renderDaySelect(validDay);
   renderTimeSelect(validDay, validTime);
-  const snapInfoEl = document.getElementById('snap-info');
-  if (snapInfoEl) snapInfoEl.textContent =
-    allSnaps.length > 0 ? `計 ${allSnaps.length}件 / ${snapDayList.length}日` : '';
 }
 
 function clearSnapSelect() {
@@ -1692,13 +1689,13 @@ function renderRanking(data) {
     const gnCell = `${markEl}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattlePlayer(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))})">${escHtml(p.username)}</span>${profileLink}`;
 
     const cells = {
-      honorRank:  `<td style="text-align:right">${honorRank <= 3 ? `<span class="medal-${honorRank}">${honorRank}</span>` : honorRank}</td>`,
-      rank:       `<td style="text-align:right;color:#64748b;font-size:11px">${p.rank || '-'}</td>`,
-      rankChange: `<td style="text-align:right">${formatChange(p.prevRank, p.rank)}</td>`,
+      honorRank:  `<td class="cell-r">${honorRank <= 3 ? `<span class="medal-${honorRank}">${honorRank}</span>` : honorRank}</td>`,
+      rank:       `<td class="cell-rank">${p.rank || '-'}</td>`,
+      rankChange: `<td class="cell-r">${formatChange(p.prevRank, p.rank)}</td>`,
       username:   `<td class="col-gn">${gnCell}</td>`,
-      killDiff:   `<td style="text-align:right;color:#64748b;font-size:12px">${p.killDiff > 0 ? '+'+numFmt(p.killDiff) : p.killDiff === 0 ? '-' : numFmt(p.killDiff)}</td>`,
-      honorDiff:  `<td class="honor-cell" style="text-align:right"><div class="honor-bar-bg" style="width:${pct}%;background:${barColor}"></div><span class="honor-diff" style="color:${diffColor}">${diffSign}${numFmt(p.honorDiff)}</span></td>`,
-      honor:      `<td style="text-align:right"><span style="font-size:13px;color:#94a3b8">${totalFmt}</span></td>`,
+      killDiff:   `<td class="cell-kill">${p.killDiff > 0 ? '+'+numFmt(p.killDiff) : p.killDiff === 0 ? '-' : numFmt(p.killDiff)}</td>`,
+      honorDiff:  `<td class="honor-cell cell-r"><div class="honor-bar-bg" style="width:${pct}%;background:${barColor}"></div><span class="honor-diff" style="color:${diffColor}">${diffSign}${numFmt(p.honorDiff)}</span></td>`,
+      honor:      `<td class="cell-r"><span class="cell-total">${totalFmt}</span></td>`,
     };
 
     const rowStyle = bInfo ? `background:${bg};border-left:5px solid ${bInfo.color}` : `background:${bg}`;
