@@ -249,7 +249,6 @@ function ensureChartJs() {
     <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
     <div class="ml-auto flex-shrink-0" style="display:flex;gap:6px;align-items:center">
       <a id="top-back-btn" href="/" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;white-space:nowrap">TOP</a>
-      <a href="/border" id="border-header-link" style="background:#1a1a3a;border:1px solid #3b82f6;color:#60a5fa;border-radius:6px;padding:4px 10px;font-size:12px;text-decoration:none;font-weight:600;white-space:nowrap">ボーダー</a>
       <button id="help-header-btn" onclick="openHelpModal()" style="background:#1a1a3a;border:1px solid #2d2d5e;color:#94a3b8;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">使い方</button>
     </div>
   </div>
@@ -367,6 +366,7 @@ function ensureChartJs() {
 </div>
 
 </div><!-- /main-wrap -->
+
 
 <!-- ========== グラフモーダル ========== -->
 <div id="graph-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeGraphModal()">
@@ -737,6 +737,11 @@ function ensureChartJs() {
         </div>
       </div>
 
+      <div style="border-top:1px solid #1e1e3f;margin-top:16px;padding-top:10px;text-align:center">
+        <a href="./privacy.html" target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">プライバシーポリシー</a>｜
+        <a href="./contact.html" target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">お問い合わせ</a>｜
+        <a href="./about.html"   target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">サイトについて</a>
+      </div>
     </div><!-- /modal-body -->
   </div><!-- /modal-box -->
 </div><!-- /help-modal -->
@@ -784,7 +789,7 @@ window.__STATIC_INDEX_URL__='https://gbfranking.com/';
 window.__STATIC_BORDER_URL__='https://border.gbfranking.com/';
 (function(){
 try{
-var s=atob('H4sIAAAAAAACCpXTwUrDMBgH8FeR75zQpLVpGxAfZIwSmuCCNB1N2GUM5sndPHoZKCIieO1lzyOd+BbSdoq6wtrrP/8v5MdHluCJufZKYa61ufLUQhlngU+WoCXwEIERuQIOPvFZvasI3W837+t1vX2o7573m5f6sQIE7ViaFbKpOiXyUmhJYgoIrBOlS6Vw37dgQrHfnCgjj/IIEIjM6YUCThBkpRJOyVS4n1KAqX9GGacxb9vaplLlRVvXNp1pKZUBTlaoIwS/CWG9q+iB8Pn0OoBAegghpr2ELh9BiDhlAwjn/wkkORDub08ToqSXQBJMoh4CSTANxhBCfwCBHhFYR/i4eRtAiPsJrH8LTT5iC+EJwhT9/SPWiLmdFc5edq/V8oIBn0xXX9Ap94RMAwAA'),u=new Uint8Array(s.length);
+var s=atob('H4sIAAAAAAAACpXTwUrDMBgH8FeR75zQpLVpGxAfZIwSmuCCNB1N2GUM5sndPHoZKCIieO1lzyOd+BbSdoq6wtrrP/8v5MdHluCJufZKYa61ufLUQhlngU+WoCXwEIERuQIOPvFZvasI3W837+t1vX2o7573m5f6sQIE7ViaFbKpOiXyUmhJYgoIrBOlS6Vw37dgQrHfnCgjj/IIEIjM6YUCThBkpRJOyVS4n1KAqX9GGacxb9vaplLlRVvXNp1pKZUBTlaoIwS/CWG9q+iB8Pn0OoBAegghpr2ELh9BiDhlAwjn/wkkORDub08ToqSXQBJMoh4CSTANxhBCfwCBHhFYR/i4eRtAiPsJrH8LTT5iC+EJwhT9/SPWiLmdFc5edq/V8oIBn0xXX9Ap94RMAwAA'),u=new Uint8Array(s.length);
 for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
 window.__STATIC_CACHE__=JSON.parse(pako.inflate(u,{to:'string'}));
 }catch(e){window.__STATIC_CACHE__={};console.warn('GBF: データ読み込み失敗（広告ブロッカーが原因の可能性）',e);}
