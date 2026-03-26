@@ -24,18 +24,24 @@ function ensureChartJs() {
 }
 </script>
 <style>
+  :root { --elem-color: #3b82f6; --elem-color-light: #60a5fa; }
   body { background: #0a0a14; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
-  .header { background: linear-gradient(135deg, #1a1a3e, #0f0f2e); border-bottom: 1px solid #2d2d5e; }
+  .header { background: linear-gradient(135deg, #1a1a3e, #0f0f2e); border-bottom: 2px solid var(--elem-color); }
   .card { background: #111127; border: 1px solid #1e1e3f; border-radius: 8px; }
-  .tab-btn { padding: 7px 4px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; width: 100%; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; }
-  .tab-btn.active { background: #2563eb; color: white; }
+  .tab-btn { padding: 7px 4px 5px; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: 600; width: 100%; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; border-bottom: 2px solid transparent; }
+  .tab-btn.active { background: #1a2040; color: var(--elem-color-light); border-bottom: 2px solid var(--elem-color); }
   .tab-btn:not(.active) { background: #1e1e3f; color: #94a3b8; }
   .tab-btn:not(.active):hover { background: #2d2d5e; }
   .tab-sub { font-size:9px; font-weight:400; opacity:0.65; }
   .rank-row:hover { background: #1a1a35 !important; }
+  .rank-row.top-1 { border-left: 4px solid #fbbf24; box-shadow: inset 60px 0 20px -20px rgba(251,191,36,0.12); }
+  .rank-row.top-2 { border-left: 4px solid #c0c0c0; box-shadow: inset 60px 0 20px -20px rgba(192,192,192,0.10); }
+  .rank-row.top-3 { border-left: 4px solid #cd7c32; box-shadow: inset 60px 0 20px -20px rgba(205,124,50,0.10); }
+  @keyframes row-flash { 0%{background-color:#1a2a40} 100%{background-color:transparent} }
+  .rank-row.flashing { animation: row-flash 1.2s ease-out; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   th { background: #0f0f25; color: #64748b; font-size: 11px; padding: 8px 10px; letter-spacing: 0.05em; overflow: hidden; position: sticky; top: 0; z-index: 2; user-select: none; white-space: nowrap; }
-  td { padding: 6px 10px; border-bottom: 1px solid #1a1a30; font-size: 13px; vertical-align: middle; overflow: hidden; }
+  td { padding: 6px 10px; border-bottom: 1px solid #1a1a30; font-size: 13px; vertical-align: middle; overflow: hidden; font-variant-numeric: tabular-nums; }
   .col-gn { text-overflow: ellipsis; white-space: nowrap; }
   .modal-body { overflow-x: auto; -webkit-overflow-scrolling: touch; min-width: 0; padding: 10px 8px; }
   .modal-table { min-width: 760px; }
@@ -177,7 +183,7 @@ function ensureChartJs() {
   html, body { height: 100%; }
   body { display: flex; flex-direction: column; overflow: hidden; }
   .main-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-  .main-wrap > div:not(.table-card) { flex-shrink: 0; }
+  .main-wrap > div:not(.table-card):not(#main-content):not(#side-panel) { flex-shrink: 0; }
   .table-card { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
   #rank-table-wrap { flex: 1; min-height: 0; }
   #site-footer { flex-shrink: 0; }
@@ -211,6 +217,21 @@ function ensureChartJs() {
   .graph-suggest-item { padding:6px 12px; cursor:pointer; font-size:12px; color:#e2e8f0; border-bottom:1px solid #1a1a30; }
   .graph-suggest-item:hover { background:#1a1a35; }
   .graph-search-wrap { position:relative; display:inline-block; }
+  /* ===== PC サイドバー (C-1) ===== */
+  #main-content { flex: 1; min-width: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  #main-content > div:not(.table-card) { flex-shrink: 0; }
+  @media (min-width: 1024px) {
+    .main-wrap { flex-direction: row !important; align-items: stretch; }
+    #side-panel { width: 210px; flex-shrink: 0; display: flex !important; flex-direction: column; gap: 8px; padding: 4px 0 4px 8px; overflow-y: auto; }
+  }
+  @media (max-width: 1023px) {
+    #side-panel { display: none !important; }
+  }
+  .side-card { background: #111127; border: 1px solid #1e1e3f; border-radius: 8px; padding: 10px 12px; }
+  .side-card-title { font-size: 10px; color: #64748b; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 6px; text-transform: uppercase; }
+  .side-card-value { font-size: 13px; font-weight: 700; color: #e2e8f0; font-variant-numeric: tabular-nums; }
+  .side-card-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+  .side-elem-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-top: 4px; }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
 </head>
@@ -245,6 +266,7 @@ function ensureChartJs() {
 
 <div class="main-wrap" style="padding:4px 10px 4px;max-width:1536px;margin:0 auto;width:100%;box-sizing:border-box">
 
+<div id="main-content">
   <!-- タブ（常に1行4列） -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px">
     <button class="tab-btn active" id="tab-20min" onclick="switchTab('20min')">20分速<span class="tab-sub">直前→最新</span></button>
@@ -338,8 +360,24 @@ function ensureChartJs() {
     </div><!-- /overflow-x:auto -->
   </div>
 
+</div><!-- /main-content -->
 
+<!-- PC サイドバー -->
+<div id="side-panel">
+  <div class="side-card" id="side-event-card">
+    <div class="side-card-title">開催中イベント</div>
+    <div class="side-card-value" id="side-event-name" style="font-size:12px;line-height:1.4">-</div>
+    <div id="side-elem-wrap"></div>
+  </div>
+  <div class="side-card" id="side-top-card">
+    <div class="side-card-title">トップ貢献度</div>
+    <div class="side-card-value" id="side-top-honor">-</div>
+    <div class="side-card-sub" id="side-top-name">-</div>
+    <div class="side-card-sub" id="side-top-diff" style="color:#4ade80"></div>
+  </div>
 </div>
+
+</div><!-- /main-wrap -->
 
 <!-- ========== グラフモーダル ========== -->
 <div id="graph-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeGraphModal()">
@@ -774,6 +812,7 @@ let loadedEvents       = [];
 let currentEventIsDemo = false;
 let currentEventDates  = { start: null, end: null };
 let playerSearchTerm   = '';
+let flashOnRender      = false;
 
 const BATTLE_COLORS    = ['#60a5fa','#fb923c','#4ade80','#c084fc','#f472b6','#facc15'];
 let battlePlayers      = [];
@@ -1186,6 +1225,7 @@ async function init() {
     updateEventLabel(defaultEvent);
     applyEventDateRange(defaultEvent);
     updateDemoState(defaultEvent);
+    applyElementTheme(defaultEvent.name || '');
   }
 
   const today       = new Date().toLocaleDateString('sv-SE');
@@ -1238,6 +1278,50 @@ async function loadEvents() {
 function updateEventLabel(event) {
 }
 
+const ELEMENT_THEMES = {
+  '火': { color: '#ef4444', light: '#f87171' },
+  '水': { color: '#3b82f6', light: '#60a5fa' },
+  '土': { color: '#d97706', light: '#f59e0b' },
+  '風': { color: '#22c55e', light: '#4ade80' },
+  '光': { color: '#eab308', light: '#fbbf24' },
+  '闇': { color: '#7c3aed', light: '#a78bfa' },
+};
+function getEventElement(name) {
+  if (!name) return null;
+  for (const ch of Object.keys(ELEMENT_THEMES)) {
+    if (name.includes(ch)) return ch;
+  }
+  return null;
+}
+function applyElementTheme(eventName) {
+  const elem = getEventElement(eventName);
+  const theme = elem ? ELEMENT_THEMES[elem] : { color: '#3b82f6', light: '#60a5fa' };
+  document.documentElement.style.setProperty('--elem-color', theme.color);
+  document.documentElement.style.setProperty('--elem-color-light', theme.light);
+  const nameEl = document.getElementById('side-event-name');
+  if (nameEl) nameEl.textContent = eventName || '-';
+  const wrap = document.getElementById('side-elem-wrap');
+  if (wrap) {
+    if (elem) {
+      wrap.innerHTML = `<span class="side-elem-badge" style="background:${theme.color}20;color:${theme.light};border:1px solid ${theme.color}50">${elem}古戦場</span>`;
+    } else {
+      wrap.innerHTML = '';
+    }
+  }
+}
+
+function updateSidePanel(data) {
+  if (!data || !data.players || !data.players.length) return;
+  const top = data.players.reduce((a, b) => (b.honorDiff || 0) > (a.honorDiff || 0) ? b : a, data.players[0]);
+  const honorEl = document.getElementById('side-top-honor');
+  const nameEl  = document.getElementById('side-top-name');
+  const diffEl  = document.getElementById('side-top-diff');
+  const updEl   = document.getElementById('side-last-update');
+  if (honorEl) honorEl.textContent = top.honor != null ? numFmt(top.honor) : '-';
+  if (nameEl)  nameEl.textContent  = top.username || '-';
+  if (diffEl)  diffEl.textContent  = top.honorDiff > 0 ? `+${numFmt(top.honorDiff)} / 20分` : '';
+}
+
 function updateDemoState(event) {
   currentEventIsDemo = !!(event?.is_demo);
   document.getElementById('demo-badge').style.display = currentEventIsDemo ? '' : 'none';
@@ -1284,6 +1368,7 @@ function connectLiveSSE() {
       apiCacheInvalidate('/api/ranking/latest');
       apiCacheInvalidate('/api/ranking/snapshots');
       apiCacheInvalidate('/api/ranking/20min');
+      flashOnRender = true;
       reload();
       if (currentTab === '20min') updateSnapList();
     } catch {}
@@ -1484,6 +1569,7 @@ function onEventChange() {
     updateEventLabel(event);
     applyEventDateRange(event);
     updateDemoState(event);
+    applyElementTheme(event.name || '');
   }
   if (liveSSE) { liveSSE.close(); liveSSE = null; }
   if (!currentEventIsDemo) connectLiveSSE();
@@ -1635,11 +1721,21 @@ function renderRanking(data) {
       honor:      `<td style="text-align:right"><span style="font-size:13px;color:#94a3b8">${totalFmt}</span></td>`,
     };
 
-    const rowStyle = bInfo ? `background:${bg};border-left:3px solid ${bInfo.color}` : `background:${bg}`;
-    return `<tr class="rank-row" style="${rowStyle}">${colOrder.map(k => cells[k]).join('')}</tr>`;
+    const rowStyle = bInfo ? `background:${bg};border-left:5px solid ${bInfo.color}` : `background:${bg}`;
+    const topCls = !bInfo && honorRank <= 3 ? ` top-${honorRank}` : '';
+    return `<tr class="rank-row${topCls}" style="${rowStyle}">${colOrder.map(k => cells[k]).join('')}</tr>`;
   });
 
   tbody.innerHTML = rows.join('');
+  updateSidePanel(data);
+  if (flashOnRender) {
+    flashOnRender = false;
+    tbody.querySelectorAll('.rank-row').forEach(r => {
+      r.classList.remove('flashing');
+      void r.offsetWidth;
+      r.classList.add('flashing');
+    });
+  }
   if (!window.__STATIC_MODE__) {
     document.getElementById('last-update').textContent = '更新: ' + new Date().toLocaleTimeString('ja-JP');
   }
@@ -1654,9 +1750,9 @@ function formatChange(prevRank, rank) {
 }
 
 function rowBg(honorRank, displayIdx) {
-  if (honorRank === 1) return '#2a2a10';
-  if (honorRank === 2) return '#1a1a28';
-  if (honorRank === 3) return '#2a1818';
+  if (honorRank === 1) return '#2a2200';
+  if (honorRank === 2) return '#1e1e2e';
+  if (honorRank === 3) return '#261400';
   return displayIdx % 2 === 0 ? 'transparent' : '#0f0f20';
 }
 
