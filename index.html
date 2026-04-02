@@ -25,42 +25,53 @@ function ensureChartJs() {
 </script>
 <style>
   :root {
+    /* === Background & Theme Variables (managed by theme-manager.js) === */
+    --theme-bg: #0a0a0a;
+    --theme-surface: #111111;
+    --theme-surface-container: #191919;
+    --theme-surface-container-high: #242424;
+    --theme-outline: #363636;
+    --theme-outline-variant: #202020;
+    --theme-on-surface: #e2e8f0;
+    --theme-on-surface-variant: #8a9ab0;
+    --chart-grid-color: rgba(255,255,255,0.09);
+    /* === Element Color Variables === */
+    --elem-color: #3b82f6;
+    --elem-color-light: #60a5fa99;
     /* === MD3 Design Tokens === */
-    --md-surface-dim:#0a0a14;
-    --md-surface:#0f0f23;
-    --md-surface-container:#141430;
-    --md-surface-container-high:#1e1e3f;
-    --md-surface-bright:#2d2d5e;
-    --md-on-surface:#e2e8f0;
-    --md-on-surface-variant:#94a3b8;
-    --md-outline:#2d2d5e;
-    --md-outline-variant:#1a1a30;
-    --md-primary:#60a5fa;
-    --md-primary-dim:#3b82f6;
-    --md-primary-container:#1a2a50;
-    --md-on-primary-container:#d0e4ff;
-    --md-secondary:#7dd3fc;
-    --md-secondary-container:#0c3a5f;
-    --md-success:#4ade80;
-    --md-warning:#fbbf24;
-    --md-error:#f87171;
-    --md-shape-xs:4px;
-    --md-shape-sm:8px;
-    --md-shape-md:12px;
-    --md-shape-lg:16px;
-    --md-shape-full:9999px;
-    --md-ease:cubic-bezier(0.2, 0, 0, 1);
-    --md-duration-short:150ms;
-    --md-duration-medium:300ms;
-    --md-duration-long:500ms;
-    --md-elevation-1:0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-    --md-elevation-2:0 2px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
-    --md-elevation-3:0 4px 12px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.2);
-    --elem-color:var(--md-primary-dim);
-    --elem-color-light:var(--md-primary);
+    --md-surface-dim: var(--theme-bg);
+    --md-surface: var(--theme-surface);
+    --md-surface-container: var(--theme-surface-container);
+    --md-surface-container-high: var(--theme-surface-container-high);
+    --md-surface-bright: var(--theme-surface-container-high);
+    --md-on-surface: var(--theme-on-surface);
+    --md-on-surface-variant: var(--theme-on-surface-variant);
+    --md-outline: var(--theme-outline);
+    --md-outline-variant: var(--theme-outline-variant);
+    --md-primary: var(--elem-color);
+    --md-primary-dim: var(--elem-color);
+    --md-primary-container: var(--theme-surface-container-high);
+    --md-on-primary-container: var(--theme-on-surface);
+    --md-secondary: var(--elem-color-light);
+    --md-secondary-container: var(--theme-surface-container-high);
+    --md-success: #4ade80;
+    --md-warning: #fbbf24;
+    --md-error: #f87171;
+    --md-shape-xs: 4px;
+    --md-shape-sm: 8px;
+    --md-shape-md: 12px;
+    --md-shape-lg: 16px;
+    --md-shape-full: 9999px;
+    --md-ease: cubic-bezier(0.2, 0, 0, 1);
+    --md-duration-short: 150ms;
+    --md-duration-medium: 300ms;
+    --md-duration-long: 500ms;
+    --md-elevation-1: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
+    --md-elevation-2: 0 2px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
+    --md-elevation-3: 0 4px 12px rgba(0,0,0,0.3), 0 3px 6px rgba(0,0,0,0.2);
   }
-  body { background: var(--md-surface-dim); color: var(--md-on-surface); font-family: 'Segoe UI', sans-serif; }
-  .header { background: linear-gradient(135deg, var(--md-surface-container-high), var(--md-surface)); border-bottom: 2px solid var(--md-primary-dim); padding: 12px 16px; }
+  body { background: var(--theme-bg); color: var(--theme-on-surface); font-family: 'Segoe UI', sans-serif; }
+  .header { background: var(--theme-surface); border-bottom: 2px solid var(--elem-color); padding: 12px 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
   .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
   .hdr-h1 { font-size: 1.05rem; color: var(--md-primary); font-weight: 500; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; letter-spacing: 0.01em; }
   .hdr-h1 a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
@@ -146,7 +157,7 @@ function ensureChartJs() {
   .type-20min    { background: var(--md-secondary-container); color: var(--md-on-primary-container); }
   .type-morning  { background: #3b2f00; color: var(--md-warning); }
   .type-daily    { background: #1a3020; color: var(--md-success); }
-  .type-overnight{ background: #2d1a45; color: #c084fc; }
+  .type-overnight{ background: color-mix(in srgb, var(--elem-color) 15%, #1a1a2e); color: var(--elem-color); }
   /* ソート */
   th.sortable { cursor: pointer; }
   th.sortable:hover { color: var(--md-on-surface); }
@@ -192,7 +203,7 @@ function ensureChartJs() {
     display: flex; align-items: center; gap: 12px; padding: 14px 20px;
     border-bottom: 1px solid var(--md-outline-variant); background: var(--md-surface-dim); flex-shrink: 0;
   }
-  .modal-body { overflow-x: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; }
+  .modal-body { overflow-x: auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; flex: 1; min-height: 0; }
   .modal-table { border-collapse: collapse; font-size: 0.75rem; table-layout: auto; width: auto; }
   .modal-table td, .modal-table th { overflow: visible; }
   .modal-table th {
@@ -280,11 +291,18 @@ function ensureChartJs() {
   #main-content > div:not(.table-card) { flex-shrink: 0; }
   @media (min-width: 1024px) {
     .main-wrap { flex-direction: row !important; align-items: stretch; }
-    #side-panel { width: 210px; flex-shrink: 0; display: flex !important; flex-direction: column; gap: 8px; padding: 4px 0 4px 8px; overflow-y: auto; }
+    #side-panel { width: 218px; flex-shrink: 0; display: flex !important; flex-direction: column; gap: 8px; padding: 4px 0 4px 8px; overflow-y: auto; transition: width 0.25s var(--md-ease); overflow: hidden; }
+    #side-panel.collapsed { width: 28px; padding: 4px 0; }
+    #side-panel.collapsed .side-card { display: none; }
+    #side-collapse-btn { display: flex !important; }
   }
   @media (max-width: 1023px) {
     #side-panel { display: none !important; }
+    #side-collapse-btn { display: none !important; }
   }
+  #side-collapse-btn { display: none; width: 100%; height: 28px; background: transparent; border: none; border-bottom: 1px solid var(--md-outline-variant); border-radius: 0; cursor: pointer; padding: 0 10px; color: var(--md-on-surface-variant); font-size: 11px; line-height: 1; transition: all var(--md-duration-short) var(--md-ease); flex-shrink: 0; align-items: center; justify-content: flex-end; gap: 4px; }
+  #side-collapse-btn:hover { color: var(--md-on-surface); background: rgba(255,255,255,0.05); }
+  #side-panel.collapsed #side-collapse-btn { justify-content: center; padding: 0; }
   .side-card { background: var(--md-surface-container); border: 1px solid var(--md-outline-variant); border-radius: var(--md-shape-md); padding: 12px; transition: border-color var(--md-duration-short) var(--md-ease); }
   .side-card:hover { border-color: var(--md-outline); }
   .side-card-title { font-size: 0.625rem; color: var(--md-on-surface-variant); font-weight: 500; letter-spacing: 0.06em; margin-bottom: 6px; text-transform: uppercase; }
@@ -300,8 +318,27 @@ function ensureChartJs() {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
   :focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
+  /* === メニューパネル === */
+  #menu-panel {
+    position: fixed; top: 0; right: 0;
+    width: 280px; height: 100vh;
+    background: var(--theme-surface-container);
+    border-left: 1px solid var(--theme-outline);
+    box-shadow: -4px 0 16px rgba(0,0,0,0.4);
+    z-index: 1000;
+    display: flex; flex-direction: column; overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+  }
+  #menu-panel.is-open { transform: translateX(0); }
+  #menu-panel a:hover { background: rgba(128,128,128,0.12); border-radius: var(--md-shape-sm); }
+  /* テーマサブメニュー */
+  #theme-submenu { display: none; flex-direction: column; margin-top: 8px; padding-left: 8px; }
+  #theme-submenu.is-open { display: flex; }
+  #theme-submenu-toggle { display: inline-block; transition: transform 0.2s; }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
+<script src="/theme-manager.js"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -320,9 +357,31 @@ function ensureChartJs() {
     <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
     <div class="hdr-right">
       <span id="viewer-badge" class="viewer-badge" style="display:none"></span>
-      <a href="/border" id="border-header-link" class="hdr-btn hdr-btn-blue">ボーダー</a>
-      <button id="help-header-btn" onclick="openHelpModal()" class="hdr-btn">使い方</button>
+      <a href="/border" class="hdr-btn hdr-btn-blue">ボーダー</a>
+      <button class="hdr-btn" id="menu-toggle-btn" onclick="toggleMenuPanel()" style="padding: 4px 8px; font-size: 20px; line-height: 1; cursor: pointer;">⋯</button>
     </div>
+  </div>
+</div>
+
+<!-- スライド式メニューパネル -->
+<div id="menu-panel">
+  <!-- テーマ選択 -->
+  <div style="padding:12px;border-bottom:1px solid var(--theme-outline-variant)">
+    <div onclick="toggleThemeSubmenu()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-radius:var(--md-shape-sm);transition:background 0.15s;user-select:none">
+      <span style="font-size:0.875rem;color:var(--theme-on-surface);font-weight:500">テーマ</span>
+      <span id="theme-submenu-toggle" style="font-size:0.75rem;color:var(--theme-on-surface-variant)">▶</span>
+    </div>
+    <div id="theme-submenu">
+      <a onclick="applyBackgroundTheme('gray')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● グレー</a>
+      <a onclick="applyBackgroundTheme('navy')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 紺</a>
+      <a onclick="applyBackgroundTheme('black')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 黒</a>
+      <a onclick="applyBackgroundTheme('white')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 白</a>
+    </div>
+  </div>
+  <!-- リンク -->
+  <div style="padding:8px 12px;flex:1">
+    <a onclick="openHowto()" style="display:block;padding:8px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">使い方</a>
+    <a href="/privacy.html" style="display:block;padding:8px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">プライバシーポリシー</a>
   </div>
 </div>
 
@@ -396,7 +455,7 @@ function ensureChartJs() {
   <div class="search-bar mt-1">
     <input id="player-search" type="text" placeholder="GN / ID で絞り込み..."
            oninput="onSearchInput()" autocomplete="off" spellcheck="false">
-    <button onclick="openGraphModal()" style="padding:3px 10px;border-radius:5px;background:#1e1e3f;border:1px solid #2d2d5e;color:#93c5fd;cursor:pointer;font-size:12px;flex-shrink:0" title="グラフ分析">📊 グラフ</button>
+    <button onclick="openGraphModal()" style="padding:3px 10px;border-radius:var(--md-shape-sm);background:var(--md-surface-container-high);border:1px solid var(--md-outline);color:var(--md-on-surface-variant);cursor:pointer;font-size:12px;flex-shrink:0;transition:all var(--md-duration-short) var(--md-ease);align-self:stretch" title="グラフ分析">グラフ</button>
     <button class="text-xs text-gray-500 hover:text-blue-400" onclick="clearSearch()">✕</button>
     <span id="search-count" class="text-xs text-gray-600"></span>
   </div>
@@ -424,6 +483,7 @@ function ensureChartJs() {
 
 <!-- PC サイドバー -->
 <div id="side-panel">
+  <button id="side-collapse-btn" onclick="toggleSidePanel()" title="サイドバーを折りたたむ"><span id="side-collapse-label" style="font-size:10px;letter-spacing:0.04em">サイド</span><span id="side-collapse-arrow">◀</span></button>
   <div class="side-card" id="side-event-card">
     <div class="side-card-title">開催中イベント</div>
     <div class="side-card-value" id="side-event-name" style="font-size:12px;line-height:1.4">-</div>
@@ -433,12 +493,12 @@ function ensureChartJs() {
     <div class="side-card-title">トップ貢献度</div>
     <div class="side-card-value" id="side-top-honor">-</div>
     <div class="side-card-sub" id="side-top-name">-</div>
-    <div class="side-card-sub" id="side-top-diff" style="color:#4ade80"></div>
+    <div class="side-card-sub" id="side-top-diff" style="color:var(--md-success)"></div>
   </div>
   <div class="side-card" id="side-watch-card" style="display:none">
     <div class="side-card-title" style="display:flex;align-items:center;justify-content:space-between">
       注目プレイヤー
-      <span style="font-size:9px;color:#4b5563;font-weight:400">★ で追加/解除</span>
+      <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:400">★ で追加/解除</span>
     </div>
     <div id="side-watch-list"></div>
   </div>
@@ -451,8 +511,8 @@ function ensureChartJs() {
 <div id="graph-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeGraphModal()">
   <div class="modal-box" style="width:min(98vw,920px);max-height:92vh">
     <div class="modal-header">
-      <span class="text-blue-300 font-bold" style="font-size:15px">📊 グラフ分析</span>
-      <button onclick="closeGraphModal()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#64748b;font-size:18px;line-height:1;padding:2px 6px" class="hover:text-white">✕</button>
+      <span class="text-blue-300 font-bold" style="font-size:15px">グラフ分析</span>
+      <button onclick="closeGraphModal()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);font-size:18px;line-height:1;padding:2px 6px" class="hover:text-white">✕</button>
     </div>
     <div class="modal-body" style="overflow-y:auto;padding:12px 14px;flex:1;display:flex;flex-direction:column;gap:10px">
 
@@ -465,7 +525,7 @@ function ensureChartJs() {
           <button id="gchart-rank-btn"  class="gchart-type-btn" onclick="setGraphChartType('rank')">順位変遷</button>
         </div>
         <!-- 期間 -->
-        <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8">
+        <div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--md-on-surface-variant)">
           <span>期間:</span>
           <select id="graph-from-select" onchange="renderGraph()" style="font-size:12px"></select>
           <span>〜</span>
@@ -477,12 +537,12 @@ function ensureChartJs() {
           <button id="honor-rel-btn" class="gchart-type-btn" onclick="setHonorOrigin('rel')">期間増加</button>
         </div>
         <!-- 予測線 -->
-        <label id="graph-predict-wrap" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8;cursor:pointer">
+        <label id="graph-predict-wrap" style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--md-on-surface-variant);cursor:pointer">
           <input type="checkbox" id="graph-predict-chk" onchange="renderGraph()"> 予測線
         </label>
         <!-- ボーダーライン -->
-        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:#94a3b8">
-          <span>ボーダー:</span>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--md-on-surface-variant)">
+          <span style="color:var(--md-on-surface-variant)">ボーダー:</span>
           <select id="graph-border-select" onchange="renderGraph()" style="font-size:12px;padding:2px 6px">
             <option value="">なし</option>
             <option value="1">1位</option>
@@ -500,7 +560,7 @@ function ensureChartJs() {
           </select>
         </label>
         <!-- 共有ボタン -->
-        <button onclick="shareGraph()" style="margin-left:auto;padding:4px 10px;border-radius:5px;background:#1e1e3f;border:1px solid #2d2d5e;color:#94a3b8;cursor:pointer;font-size:12px;flex-shrink:0" title="画像として保存">保存</button>
+        <button onclick="shareGraph()" style="margin-left:auto;padding:4px 10px;border-radius:5px;background:var(--md-primary-dim);border:1px solid var(--md-primary-dim);color:#fff;cursor:pointer;font-size:12px;flex-shrink:0;transition:all var(--md-duration-short) var(--md-ease)" title="画像として保存">保存</button>
       </div>
 
       <!-- プレイヤー管理：操作ボタン行 -->
@@ -509,24 +569,24 @@ function ensureChartJs() {
         <div class="graph-search-wrap">
           <input id="graph-player-search" type="text" placeholder="プレイヤー名..." style="font-size:12px;width:130px"
                  oninput="onGraphPlayerSearch()" onblur="setTimeout(()=>hideGraphSuggest(),200)" autocomplete="off">
-          <div id="graph-player-suggest" style="display:none;position:absolute;top:100%;left:0;z-index:300;background:#111127;border:1px solid #2d2d5e;border-radius:6px;max-height:160px;overflow-y:auto;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,0.5)"></div>
+          <div id="graph-player-suggest" style="display:none;position:absolute;top:100%;left:0;z-index:300;background:var(--md-surface-container);border:1px solid var(--md-outline);border-radius:var(--md-shape-sm);max-height:160px;overflow-y:auto;min-width:180px;box-shadow:var(--md-elevation-3)"></div>
         </div>
-        <button class="graph-sub-btn" onclick="clearGraphPlayers()" style="border-color:#4b1d1d;color:#f87171">✕ クリア</button>
+        <button class="graph-sub-btn" onclick="clearGraphPlayers()" style="border-color:var(--md-error);color:var(--md-error)">✕ クリア</button>
       </div>
       <!-- プレイヤータグ行 -->
       <div id="graph-player-tags" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:24px"></div>
 
       <!-- ローディング -->
-      <div id="graph-loading" style="display:none;text-align:center;color:#64748b;font-size:13px;padding:12px">データ読み込み中...</div>
+      <div id="graph-loading" style="display:none;text-align:center;color:var(--md-on-surface-variant);font-size:13px;padding:12px">データ読み込み中...</div>
 
       <!-- チャートエリア -->
       <div id="graph-chart-area" style="position:relative;height:260px;flex-shrink:0">
-        <div id="graph-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#4b5563;font-size:13px;z-index:1;pointer-events:none">プレイヤーを選択してください</div>
+        <div id="graph-empty" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--md-on-surface-variant);font-size:13px;z-index:1;pointer-events:none">プレイヤーを選択してください</div>
         <canvas id="ranking-chart" style="display:block"></canvas>
       </div>
 
       <!-- 予測情報 -->
-      <div id="graph-predict-info" style="font-size:11px;color:#64748b;min-height:16px;text-align:right"></div>
+      <div id="graph-predict-info" style="font-size:11px;color:var(--md-on-surface-variant);min-height:16px;text-align:right"></div>
 
     </div>
   </div>
@@ -537,10 +597,10 @@ function ensureChartJs() {
   <div class="modal-box" style="width:min(96vw,640px);max-height:90vh">
     <div class="modal-header">
       <span class="text-blue-300 font-bold" style="font-size:15px">使い方ガイド</span>
-      <button onclick="closeHelpModal()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#64748b;font-size:18px;line-height:1;padding:2px 6px" class="hover:text-white">✕</button>
+      <button onclick="closeHelpModal()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);font-size:18px;line-height:1;padding:2px 6px" class="hover:text-white">✕</button>
     </div>
     <!-- タブ -->
-    <div style="display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid #1e1e3f;flex-wrap:wrap;background:#0d0d22">
+    <div style="display:flex;gap:4px;padding:10px 14px 0;border-bottom:1px solid var(--md-outline-variant);flex-wrap:wrap;background:var(--md-surface-dim)">
       <button class="help-tab active" id="htab-ranking" onclick="switchHelpTab('ranking')">ランキング種別</button>
       <button class="help-tab" id="htab-snap" onclick="switchHelpTab('snap')">スナップ選択</button>
       <button class="help-tab" id="htab-battle" onclick="switchHelpTab('battle')">バトルモード</button>
@@ -566,12 +626,12 @@ function ensureChartJs() {
           <text x="185" y="108" fill="#64748b" font-size="11" text-anchor="middle">7:00</text>
           <text x="255" y="108" fill="#64748b" font-size="11" text-anchor="middle">8:00</text>
           <text x="490" y="108" fill="#64748b" font-size="11" text-anchor="middle">0:00</text>
-          <!-- 残業 0:00→7:00 (purple) -->
-          <rect x="40" y="62" width="145" height="18" rx="3" fill="#2d1a45" opacity="0.85"/>
-          <line x1="40" y1="71" x2="182" y2="71" stroke="#c084fc" stroke-width="2.5"/>
-          <polygon points="182,66 182,76 190,71" fill="#c084fc"/>
-          <text x="112" y="55" fill="#c084fc" font-size="12" text-anchor="middle" font-weight="bold">残業</text>
-          <line x1="112" y1="57" x2="112" y2="62" stroke="#c084fc" stroke-width="1" opacity="0.5"/>
+          <!-- 残業 0:00→7:00 (elem-color) -->
+          <rect x="40" y="62" width="145" height="18" rx="3" fill="var(--elem-color)" fill-opacity="0.12" opacity="0.85"/>
+          <line x1="40" y1="71" x2="182" y2="71" stroke="var(--elem-color)" stroke-width="2.5"/>
+          <polygon points="182,66 182,76 190,71" fill="var(--elem-color)"/>
+          <text x="112" y="55" fill="var(--elem-color)" font-size="12" text-anchor="middle" font-weight="bold">残業</text>
+          <line x1="112" y1="57" x2="112" y2="62" stroke="var(--elem-color)" stroke-width="1" opacity="0.5"/>
           <!-- 朝活 7:00→8:00 (yellow) -->
           <rect x="185" y="115" width="70" height="18" rx="3" fill="#3b2f00" opacity="0.85"/>
           <line x1="185" y1="124" x2="252" y2="124" stroke="#fbbf24" stroke-width="2.5"/>
@@ -593,21 +653,21 @@ function ensureChartJs() {
           <line x1="432" y1="94" x2="432" y2="158" stroke="#374151" stroke-width="1" stroke-dasharray="2,2"/>
         </svg>
         <div class="help-grid">
-          <div class="help-grid-item" style="border-left:3px solid #c084fc">
-            <div style="color:#c084fc;font-weight:700">残業</div>
-            <div style="color:#94a3b8;margin-top:4px">0:00 → 7:00（深夜帯）</div>
+          <div class="help-grid-item" style="border-left:3px solid var(--elem-color)">
+            <div style="color:var(--elem-color);font-weight:700">残業</div>
+            <div style="color:var(--md-on-surface-variant);margin-top:4px">0:00 → 7:00（深夜帯）</div>
           </div>
           <div class="help-grid-item" style="border-left:3px solid #fbbf24">
             <div style="color:#fbbf24;font-weight:700">朝活</div>
-            <div style="color:#94a3b8;margin-top:4px">7:00 → 8:00（朝1時間）</div>
+            <div style="color:var(--md-on-surface-variant);margin-top:4px">7:00 → 8:00（朝1時間）</div>
           </div>
           <div class="help-grid-item" style="border-left:3px solid #4ade80">
             <div style="color:#4ade80;font-weight:700">日速</div>
-            <div style="color:#94a3b8;margin-top:4px">7:00 → 0:00（1日全体）</div>
+            <div style="color:var(--md-on-surface-variant);margin-top:4px">7:00 → 0:00（1日全体）</div>
           </div>
           <div class="help-grid-item" style="border-left:3px solid #93c5fd">
             <div style="color:#93c5fd;font-weight:700">20分速</div>
-            <div style="color:#94a3b8;margin-top:4px">直前→最新の差分</div>
+            <div style="color:var(--md-on-surface-variant);margin-top:4px">直前→最新の差分</div>
           </div>
         </div>
       </div>
@@ -643,7 +703,7 @@ function ensureChartJs() {
           <rect x="60" y="124" width="360" height="22" rx="4" fill="#111127" stroke="#1e3a5f" stroke-width="1"/>
           <text x="240" y="139" fill="#93c5fd" font-size="10" text-anchor="middle">選択スナップ と 直前スナップ の貢献度差分を表示</text>
         </svg>
-        <div class="help-tip"><strong style="color:#e2e8f0">キーボード操作:</strong> ← → キーで時間を1スナップずつ移動できます。入力欄にフォーカスしていない状態で使えます。</div>
+        <div class="help-tip"><strong style="color:var(--md-on-surface)">キーボード操作:</strong> ← → キーで時間を1スナップずつ移動できます。入力欄にフォーカスしていない状態で使えます。</div>
       </div>
 
       <!-- ===== バトルモード ===== -->
@@ -685,12 +745,12 @@ function ensureChartJs() {
           <text x="380" y="160" fill="#fbbf24" font-size="11">+1,234,567</text>
           <text x="300" y="174" fill="#4b5563" font-size="9" text-anchor="middle">← 色付きマーカーで追跡される</text>
         </svg>
-        <div class="help-tip">バトルバーのメンバー名横の <strong style="color:#e2e8f0">✕</strong> でピン解除。<strong style="color:#e2e8f0">「この人たちだけ表示」</strong> で絞り込み表示に切り替えられます。</div>
+        <div class="help-tip">バトルバーのメンバー名横の <strong style="color:var(--md-on-surface)">✕</strong> でピン解除。<strong style="color:var(--md-on-surface)">「この人たちだけ表示」</strong> で絞り込み表示に切り替えられます。</div>
       </div>
 
       <!-- ===== プレイヤー履歴 ===== -->
       <div id="hpanel-history" class="help-panel" style="display:none">
-        <p class="help-panel-desc">ランキング行の <strong style="color:#e2e8f0">📋</strong> ボタンをクリックすると、そのプレイヤーの全スナップショット貢献度履歴が表示されます。</p>
+        <p class="help-panel-desc">ランキング行の <strong style="color:var(--md-on-surface)">📋</strong> ボタンをクリックすると、そのプレイヤーの全スナップショット貢献度履歴が表示されます。</p>
         <svg viewBox="0 0 480 168" style="width:100%;max-width:480px;display:block;margin:0 auto">
           <!-- ランキング行 -->
           <rect x="8" y="8" width="464" height="30" rx="3" fill="#111127" stroke="#1e1e3f" stroke-width="1"/>
@@ -791,35 +851,29 @@ function ensureChartJs() {
         <div class="help-grid">
           <div class="help-grid-item">
             <div style="color:#93c5fd;font-weight:700;margin-bottom:4px">グラフ種別</div>
-            <div style="color:#94a3b8;font-size:12px"><strong style="color:#e2e8f0">20分速</strong> ― スナップごとの貢献度増加量<br><strong style="color:#e2e8f0">累計貢献度</strong> ― 総貢献度の推移<br><strong style="color:#e2e8f0">順位変遷</strong> ― 全体順位の推移</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px"><strong style="color:var(--md-on-surface)">20分速</strong> ― スナップごとの貢献度増加量<br><strong style="color:var(--md-on-surface)">累計貢献度</strong> ― 総貢献度の推移<br><strong style="color:var(--md-on-surface)">順位変遷</strong> ― 全体順位の推移</div>
           </div>
           <div class="help-grid-item">
             <div style="color:#4ade80;font-weight:700;margin-bottom:4px">予測線</div>
-            <div style="color:#94a3b8;font-size:12px">累計貢献度モードで「予測線」をONにすると、直近8スナップの線形回帰から2時間先の推移を破線で表示します。</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px">累計貢献度モードで「予測線」をONにすると、直近8スナップの線形回帰から2時間先の推移を破線で表示します。</div>
           </div>
           <div class="help-grid-item">
             <div style="color:#fbbf24;font-weight:700;margin-bottom:4px">期間絞り込み</div>
-            <div style="color:#94a3b8;font-size:12px">日付のFrom〜Toで表示スナップ範囲を限定できます。</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px">日付のFrom〜Toで表示スナップ範囲を限定できます。</div>
           </div>
           <div class="help-grid-item">
             <div style="color:#a78bfa;font-weight:700;margin-bottom:4px">プレイヤー追加</div>
-            <div style="color:#94a3b8;font-size:12px">モーダル内の検索欄からも個別追加できます。タグの「✕」で削除。</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px">モーダル内の検索欄からも個別追加できます。タグの「✕」で削除。</div>
           </div>
           <div class="help-grid-item">
             <div style="color:#fb923c;font-weight:700;margin-bottom:4px">画像保存</div>
-            <div style="color:#94a3b8;font-size:12px">「保存」ボタンでグラフをPNG画像としてダウンロードできます。</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px">「保存」ボタンでグラフをPNG画像としてダウンロードできます。</div>
           </div>
           <div class="help-grid-item">
             <div style="color:#38bdf8;font-weight:700;margin-bottom:4px">ハイライト</div>
-            <div style="color:#94a3b8;font-size:12px">プレイヤー名にカーソルを合わせると、そのプレイヤーの線が強調されます。</div>
+            <div style="color:var(--md-on-surface-variant);font-size:12px">プレイヤー名にカーソルを合わせると、そのプレイヤーの線が強調されます。</div>
           </div>
         </div>
-      </div>
-
-      <div style="border-top:1px solid #1e1e3f;margin-top:16px;padding-top:10px;text-align:center">
-        <a id="modal-privacy-link" href="./privacy.html" target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">プライバシーポリシー</a>｜
-        <a id="modal-contact-link" href="./contact.html" target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">お問い合わせ</a>｜
-        <a id="modal-about-link"   href="./about.html"   target="_blank" style="color:#374151;font-size:10px;text-decoration:none;margin:0 6px">サイトについて</a>
       </div>
     </div><!-- /modal-body -->
   </div><!-- /modal-box -->
@@ -831,11 +885,11 @@ function ensureChartJs() {
     <div class="modal-header">
       <span id="modal-player-name" class="text-blue-300 font-bold" style="font-size:15px"></span>
       <a id="modal-profile-link" href="#" target="_blank" rel="noopener"
-         style="font-size:11px;color:#64748b;text-decoration:none;display:none"
+         style="font-size:11px;color:var(--md-on-surface-variant);text-decoration:none;display:none"
          class="hover:text-blue-400">↗ GBFプロフィール</a>
       <div id="modal-summary" class="text-xs text-gray-500 ml-2"></div>
       <button onclick="closePlayerModal()" title="閉じる"
-        style="margin-left:auto;background:none;border:none;cursor:pointer;color:#64748b;font-size:18px;line-height:1;padding:2px 6px"
+        style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);font-size:18px;line-height:1;padding:2px 6px"
         class="hover:text-white">✕</button>
     </div>
     <div class="modal-body">
@@ -1428,7 +1482,7 @@ function updateWatchPanel(data) {
 
   const html = sortedNames.map(name => {
     const p = players.find(pl => pl.username === name);
-    if (!p) return `<div class="side-watch-row" style="flex-direction:column;padding:4px 0"><span style="font-size:12px;color:#4b5563;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%">${escHtml(name)}</span><span style="font-size:10px;color:#374151">圏外</span></div>`;
+    if (!p) return `<div class="side-watch-row" style="flex-direction:column;padding:4px 0"><div style="display:flex;align-items:center;gap:4px;width:100%;min-width:0"><span style="flex:1;font-size:12px;color:var(--md-on-surface-variant);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</span><span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.5">圏外</span><button onclick="removeWatchedPlayer(event,'${escHtml(name)}')" style="background:none;border:none;color:var(--md-on-surface-variant);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;flex-shrink:0;opacity:0.5;transition:opacity var(--md-duration-short) var(--md-ease)" onmouseenter="this.style.opacity='1';this.style.color='var(--md-error)'" onmouseleave="this.style.opacity='0.5';this.style.color='var(--md-on-surface-variant)'" title="削除">✕</button></div></div>`;
 
     // 速度順位（ラベルなし）
     const spd = p.honorRank != null ? `${p.honorRank}位` : '';
@@ -1452,11 +1506,32 @@ function updateWatchPanel(data) {
       <div style="display:flex;align-items:center;gap:4px;width:100%;min-width:0">
         <span style="flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(name)}</span>
         ${p.honorDiff > 0 ? `<span style="color:#4ade80;font-size:11px;flex-shrink:0">+${numFmt(p.honorDiff)}</span>` : ''}
+        <button onclick="removeWatchedPlayer(event,'${escHtml(name)}')" style="background:none;border:none;color:var(--md-on-surface-variant);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;flex-shrink:0;opacity:0.5;transition:opacity var(--md-duration-short) var(--md-ease)" onmouseenter="this.style.opacity='1';this.style.color='var(--md-error)'" onmouseleave="this.style.opacity='0.5';this.style.color='var(--md-on-surface-variant)'" title="削除">✕</button>
       </div>
-      <div style="font-size:10px;color:#64748b;line-height:1.5">${statsLine}</div>
+      <div style="font-size:10px;color:var(--md-on-surface-variant);line-height:1.5">${statsLine}</div>
     </div>`;
   }).join('');
   listEl.innerHTML = html;
+}
+
+function removeWatchedPlayer(e, username) {
+  e.stopPropagation();
+  watchedNames.delete(username);
+  saveWatched();
+  // テーブル内の★も連動して更新
+  document.querySelectorAll('.watch-star').forEach(btn => {
+    const un = btn.dataset.un;
+    if (un) btn.classList.toggle('on', watchedNames.has(un));
+  });
+  const row = e.target.closest('.side-watch-row');
+  if (row) {
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(20px)';
+    row.style.transition = 'opacity var(--md-duration-short) var(--md-ease), transform var(--md-duration-short) var(--md-ease)';
+    setTimeout(() => {
+      updateWatchPanel(currentRenderData);
+    }, 150);
+  }
 }
 
 function updateSidePanel(data) {
@@ -1787,7 +1862,7 @@ function renderRanking(data) {
 
   if (!data || !data.players || data.players.length === 0) {
     const hint = currentTab !== '20min'
-      ? `<br><span style="font-size:11px;color:#4b5563">◀ ▶ で日付を変えると過去のデータが見られます</span>` : '';
+      ? `<br><span style="font-size:11px;color:var(--md-on-surface-variant)">◀ ▶ で日付を変えると過去のデータが見られます</span>` : '';
     tbody.innerHTML = `<tr><td colspan="${colOrder.length}" class="no-data">データがありません（スナップショットが2件以上必要です）${hint}</td></tr>`;
     statBar.style.display = 'none';
     updateSearchCount(0, 0);
@@ -1853,7 +1928,7 @@ function renderRanking(data) {
     const markEl = bInfo ? `<span class="battle-row-mark" style="background:${bInfo.color}"></span>` : '';
     const gnCls  = bInfo ? ' gn-pinned' : '';
     const gnCol  = bInfo ? ` style="color:${bInfo.color}"` : '';
-    const histBtn = `<span style="cursor:pointer;color:#4b5563;font-size:10px;margin-right:3px" onclick="event.stopPropagation();openPlayerModal(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))},${currentEventId})" title="履歴を見る">📋</span>`;
+    const histBtn = `<span style="cursor:pointer;color:var(--md-on-surface-variant);font-size:10px;margin-right:3px" onclick="event.stopPropagation();openPlayerModal(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))},${currentEventId})" title="履歴を見る">📋</span>`;
     const starBtn = `<button class="watch-star${watchedNames.has(p.username)?' on':''}" data-un="${escHtml(p.username)}" onclick="toggleWatch(event,${escHtml(JSON.stringify(p.username))})" title="${watchedNames.has(p.username)?'注目解除':'注目に追加'}">★</button>`;
     const gnCell = `${markEl}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattlePlayer(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))})">${escHtml(p.username)}</span>${profileLink}${starBtn}`;
 
@@ -1987,7 +2062,7 @@ async function openPlayerModal(playerId, username, eventId) {
 
   if (!history.length) {
     document.getElementById('modal-tbody').innerHTML =
-      '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px">データがありません</td></tr>';
+      '<tr><td colspan="7" style="text-align:center;color:var(--md-on-surface-variant);padding:24px">データがありません</td></tr>';
     document.getElementById('modal-table-wrap').style.display = '';
     return;
   }
@@ -2014,9 +2089,9 @@ async function openPlayerModal(playerId, username, eventId) {
       <td style="color:${rank20Clr};font-weight:${rank20Wt}">${rank20}</td>
       <td>${h.rank || '-'}</td>
       <td style="color:${killColor}">${killStr}</td>
-      <td style="color:#4b5563">${numFmt(h.kill_count)}</td>
+      <td style="color:var(--md-on-surface-variant)">${numFmt(h.kill_count)}</td>
       <td style="color:${diffColor};font-weight:${diffWt}">${diffStr}</td>
-      <td style="color:#94a3b8">${numFmt(h.honor)}</td>
+      <td style="color:var(--md-on-surface-variant)">${numFmt(h.honor)}</td>
     </tr>`;
   });
 
@@ -2196,7 +2271,7 @@ function updateGraphPlayerTags() {
   const el = document.getElementById('graph-player-tags');
   if (!el) return;
   if (!graphPlayers.length) {
-    el.innerHTML = '<span style="font-size:11px;color:#4b5563">バトルバーまたは下の検索からプレイヤーを追加</span>';
+    el.innerHTML = '<span style="font-size:11px;color:var(--md-on-surface-variant)">バトルバーまたは下の検索からプレイヤーを追加</span>';
     return;
   }
   el.innerHTML = graphPlayers.map(p =>
@@ -2487,15 +2562,15 @@ async function renderGraph() {
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: {
-          labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 14, padding: 10 },
+          labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--theme-on-surface-variant').trim() || '#94a3b8', font: { size: 11 }, boxWidth: 14, padding: 10 },
           position: 'top',
         },
         tooltip: {
-          backgroundColor: '#111127',
-          borderColor: '#2d2d5e',
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-surface-container-high').trim() || '#111127',
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-outline').trim() || '#2d2d5e',
           borderWidth: 1,
-          titleColor: '#94a3b8',
-          bodyColor: '#e2e8f0',
+          titleColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-on-surface-variant').trim() || '#94a3b8',
+          bodyColor: getComputedStyle(document.documentElement).getPropertyValue('--theme-on-surface').trim() || '#e2e8f0',
           callbacks: {
             label: ctx => {
               if (ctx.raw == null) return ` ${ctx.dataset.label}: -`;
@@ -2508,20 +2583,20 @@ async function renderGraph() {
       },
       scales: {
         x: {
-          ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 14, maxRotation: 45 },
-          grid: { color: '#1a1a2e' },
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--theme-on-surface-variant').trim() || '#64748b', font: { size: 10 }, maxTicksLimit: 14, maxRotation: 45 },
+          grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid-color').trim() || 'rgba(255,255,255,0.09)' },
         },
         y: {
-          reverse: isRank, // 順位変遷: 1位が上になるよう反転
+          reverse: isRank,
           min: isRank ? 1 : undefined,
-          ticks: { color: '#64748b', font: { size: 10 }, callback: v => {
+          ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--theme-on-surface-variant').trim() || '#64748b', font: { size: 10 }, callback: v => {
             if (isRank) return v % 1 === 0 ? numFmt(v) + '位' : '';
             const a = Math.abs(v);
             if (a >= 1e8) return (v/1e8).toFixed(a >= 1e9 ? 1 : 0) + '億';
             if (a >= 1e4) return (v/1e4).toFixed(0) + '万';
             return numFmt(v);
           }},
-          grid: { color: '#1a1a2e' },
+          grid: { color: getComputedStyle(document.documentElement).getPropertyValue('--chart-grid-color').trim() || 'rgba(255,255,255,0.09)' },
         },
       },
     },
@@ -2564,11 +2639,12 @@ function shareGraph() {
   const ctx = off.getContext('2d');
 
   // 背景
-  ctx.fillStyle = '#0f0f1a';
+  const cs = getComputedStyle(document.documentElement);
+  ctx.fillStyle = cs.getPropertyValue('--theme-bg').trim() || '#0f0f1a';
   ctx.fillRect(0, 0, W, H);
 
   // タイトル
-  ctx.fillStyle = '#93c5fd';
+  ctx.fillStyle = cs.getPropertyValue('--elem-color').trim() || '#93c5fd';
   ctx.font = 'bold 13px sans-serif';
   ctx.fillText(title, pad, pad + 16);
 
@@ -2607,6 +2683,34 @@ init().then(() => updateTableHeight());
   const h = location.hostname;
   const isLive = !window.__STATIC_MODE__ && h !== 'localhost' && h !== '127.0.0.1';
   if (isLive) document.getElementById('live-badge').style.display = '';
+})();
+
+// サイドバー折りたたみ
+function toggleSidePanel() {
+  const panel = document.getElementById('side-panel');
+  const btn = document.getElementById('side-collapse-btn');
+  const label = document.getElementById('side-collapse-label');
+  const arrow = document.getElementById('side-collapse-arrow');
+  const collapsed = panel.classList.toggle('collapsed');
+  if (arrow) arrow.textContent = collapsed ? '▶' : '◀';
+  if (label) label.style.display = collapsed ? 'none' : '';
+  btn.title = collapsed ? 'サイドバーを開く' : 'サイドバーを折りたたむ';
+  try { localStorage.setItem('gbf_side_collapsed', collapsed ? '1' : '0'); } catch {}
+}
+// 折りたたみ状態を復元
+(function(){
+  try {
+    if (localStorage.getItem('gbf_side_collapsed') === '1') {
+      const panel = document.getElementById('side-panel');
+      const btn = document.getElementById('side-collapse-btn');
+      const label = document.getElementById('side-collapse-label');
+      const arrow = document.getElementById('side-collapse-arrow');
+      if (panel) panel.classList.add('collapsed');
+      if (arrow) arrow.textContent = '▶';
+      if (label) label.style.display = 'none';
+      if (btn) btn.title = 'サイドバーを開く';
+    }
+  } catch {}
 })();
 </script>
 </body>
