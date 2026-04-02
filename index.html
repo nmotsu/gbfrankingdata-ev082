@@ -320,7 +320,7 @@ function ensureChartJs() {
   :focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
-<script src="/theme-manager.js"></script>
+<script src="/theme-manager.js?v=20260403"></script>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -2593,7 +2593,24 @@ function shareGraph() {
   const srcCanvas = document.getElementById('ranking-chart');
   const typeLabel = { speed: '20分速', honor: '累計貢献度', rank: '順位変遷' }[graphChartType] || '';
   const players = graphPlayers.map(p => p.name).join(' / ');
-  const title = `GBF古戦場データ倉庫 ｜ ${typeLabel} ｜ ${players}`;
+
+  // イベント名
+  const event = loadedEvents.find(e => String(e.id) === String(currentEventId));
+  const eventName = event?.name || 'GBF古戦場';
+
+  // 期間（YYYY-MM-DD → M/D 形式）
+  const fromVal = document.getElementById('graph-from-select')?.value || '';
+  const toVal   = document.getElementById('graph-to-select')?.value   || '';
+  function fmtDay(d) { return d ? `${parseInt(d.slice(5,7))}/${parseInt(d.slice(8,10))}` : ''; }
+  const dateRange = fromVal && toVal
+    ? (fromVal === toVal ? fmtDay(fromVal) : `${fmtDay(fromVal)} 〜 ${fmtDay(toVal)}`)
+    : '';
+
+  const title = [
+    dateRange ? `${eventName}　(${dateRange})` : eventName,
+    typeLabel,
+    players,
+  ].filter(Boolean).join('　｜　');
 
   const pad = 12;
   const titleH = 28;
@@ -2605,21 +2622,22 @@ function shareGraph() {
   off.width = W; off.height = H;
   const ctx = off.getContext('2d');
 
-  // 背景
   const cs = getComputedStyle(document.documentElement);
-  ctx.fillStyle = cs.getPropertyValue('--theme-bg').trim() || '#0f0f1a';
+
+  // 背景
+  ctx.fillStyle = cs.getPropertyValue('--theme-bg').trim() || '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
 
   // タイトル
-  ctx.fillStyle = cs.getPropertyValue('--elem-color').trim() || '#93c5fd';
+  ctx.fillStyle = cs.getPropertyValue('--elem-color').trim() || '#3b82f6';
   ctx.font = 'bold 13px sans-serif';
   ctx.fillText(title, pad, pad + 16);
 
-  // グラフ
+  // グラフ本体
   ctx.drawImage(srcCanvas, pad, pad + titleH);
 
   // フッター
-  ctx.fillStyle = '#374151';
+  ctx.fillStyle = '#4b5563';
   ctx.font = '10px sans-serif';
   ctx.fillText('gbfranking.com', pad, H - 6);
 
