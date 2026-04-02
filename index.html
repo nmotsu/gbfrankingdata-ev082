@@ -107,10 +107,10 @@ function ensureChartJs() {
     .hdr-h1 { flex: 0 0 auto; }
   }
   .card { background: var(--md-surface-container); border: 1px solid var(--md-outline-variant); border-radius: var(--md-shape-md); }
-  .tab-btn { padding: 8px 4px 6px; border-radius: var(--md-shape-sm); cursor: pointer; transition: all var(--md-duration-short) var(--md-ease); font-size: 0.8125rem; font-weight: 600; width: 100%; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; border-bottom: 2px solid transparent; }
-  .tab-btn.active { background: var(--md-primary-container); color: var(--md-primary); border-bottom: 2px solid var(--md-primary-dim); }
+  .tab-btn { padding: 8px 4px 6px; border-radius: var(--md-shape-sm); cursor: pointer; transition: all var(--md-duration-short) var(--md-ease); font-size: 0.8125rem; font-weight: 600; width: 100%; display:flex; flex-direction:column; align-items:center; gap:2px; line-height:1.2; border: 2px solid transparent; }
+  .tab-btn.active { background: var(--md-surface-container-high); color: var(--md-primary); border-color: var(--md-primary); box-shadow: 0 0 8px color-mix(in srgb, var(--elem-color) 40%, transparent); }
   .tab-btn:not(.active) { background: var(--md-surface-container-high); color: var(--md-on-surface-variant); }
-  .tab-btn:not(.active):hover { background: var(--md-surface-bright); }
+  .tab-btn:not(.active):hover { background: var(--md-surface-bright); color: var(--md-on-surface); }
   .tab-sub { font-size: 0.5625rem; font-weight:400; opacity:0.65; }
   .rank-row:hover { background: rgba(255,255,255,0.05) !important; }
   .rank-row.top-1 { border-left: 4px solid var(--md-warning); box-shadow: inset 60px 0 20px -20px rgba(251,191,36,0.12); }
@@ -318,24 +318,6 @@ function ensureChartJs() {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
   :focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
-  /* === メニューパネル === */
-  #menu-panel {
-    position: fixed; top: 0; right: 0;
-    width: 280px; height: 100vh;
-    background: var(--theme-surface-container);
-    border-left: 1px solid var(--theme-outline);
-    box-shadow: -4px 0 16px rgba(0,0,0,0.4);
-    z-index: 1000;
-    display: flex; flex-direction: column; overflow-y: auto;
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
-  }
-  #menu-panel.is-open { transform: translateX(0); }
-  #menu-panel a:hover { background: rgba(128,128,128,0.12); border-radius: var(--md-shape-sm); }
-  /* テーマサブメニュー */
-  #theme-submenu { display: none; flex-direction: column; margin-top: 8px; padding-left: 8px; }
-  #theme-submenu.is-open { display: flex; }
-  #theme-submenu-toggle { display: inline-block; transition: transform 0.2s; }
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
 <script src="/theme-manager.js"></script>
@@ -357,33 +339,12 @@ function ensureChartJs() {
     <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
     <div class="hdr-right">
       <span id="viewer-badge" class="viewer-badge" style="display:none"></span>
-      <a href="/border" class="hdr-btn hdr-btn-blue">ボーダー</a>
-      <button class="hdr-btn" id="menu-toggle-btn" onclick="toggleMenuPanel()" style="padding: 4px 8px; font-size: 20px; line-height: 1; cursor: pointer;">⋯</button>
+      <a href="/border" class="hdr-btn hdr-btn-blue" id="border-header-link">ボーダー</a>
+      <button class="hdr-btn" onclick="openHelpModal()">使い方</button>
     </div>
   </div>
 </div>
 
-<!-- スライド式メニューパネル -->
-<div id="menu-panel">
-  <!-- テーマ選択 -->
-  <div style="padding:12px;border-bottom:1px solid var(--theme-outline-variant)">
-    <div onclick="toggleThemeSubmenu()" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;cursor:pointer;border-radius:var(--md-shape-sm);transition:background 0.15s;user-select:none">
-      <span style="font-size:0.875rem;color:var(--theme-on-surface);font-weight:500">テーマ</span>
-      <span id="theme-submenu-toggle" style="font-size:0.75rem;color:var(--theme-on-surface-variant)">▶</span>
-    </div>
-    <div id="theme-submenu">
-      <a onclick="applyBackgroundTheme('gray')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● グレー</a>
-      <a onclick="applyBackgroundTheme('navy')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 紺</a>
-      <a onclick="applyBackgroundTheme('black')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 黒</a>
-      <a onclick="applyBackgroundTheme('white')" style="display:block;padding:7px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">● 白</a>
-    </div>
-  </div>
-  <!-- リンク -->
-  <div style="padding:8px 12px;flex:1">
-    <a onclick="openHowto()" style="display:block;padding:8px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">使い方</a>
-    <a href="/privacy.html" style="display:block;padding:8px 12px;color:var(--theme-on-surface);text-decoration:none;cursor:pointer;font-size:0.875rem">プライバシーポリシー</a>
-  </div>
-</div>
 
 <div class="main-wrap" style="padding:4px 10px 4px;max-width:1536px;margin:0 auto;width:100%;box-sizing:border-box">
 
@@ -874,6 +835,11 @@ function ensureChartJs() {
             <div style="color:var(--md-on-surface-variant);font-size:12px">プレイヤー名にカーソルを合わせると、そのプレイヤーの線が強調されます。</div>
           </div>
         </div>
+      </div>
+      <div style="border-top:1px solid var(--md-outline-variant);margin-top:16px;padding-top:12px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <a href="/privacy.html" style="font-size:0.75rem;color:var(--md-on-surface-variant);text-decoration:none" class="hover:underline">プライバシーポリシー</a>
+        <a href="/contact.html" style="font-size:0.75rem;color:var(--md-on-surface-variant);text-decoration:none" class="hover:underline">お問い合わせ</a>
+        <a href="/about.html" style="font-size:0.75rem;color:var(--md-on-surface-variant);text-decoration:none" class="hover:underline">サイトについて</a>
       </div>
     </div><!-- /modal-body -->
   </div><!-- /modal-box -->
@@ -1971,7 +1937,8 @@ function rowBg(honorRank, displayIdx) {
   if (honorRank === 1) return '#2a2200';
   if (honorRank === 2) return '#1e1e2e';
   if (honorRank === 3) return '#261400';
-  return displayIdx % 2 === 0 ? 'transparent' : '#0f0f20';
+  if (displayIdx % 2 === 0) return 'transparent';
+  return 'rgba(255,255,255,0.04)';
 }
 
 function numFmt(n) {
