@@ -240,6 +240,7 @@ function ensureChartJs() {
   .battle-filter-btn:hover { filter:brightness(1.15); }
   .gn-pinned { font-weight:800; text-decoration:underline dotted; }
   .battle-row-mark { display:inline-block; width:3px; height:13px; border-radius:2px; margin-right:5px; vertical-align:middle; }
+  .solo-mark { display:inline-block; font-size:9px; font-weight:700; color:#ef4444; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:3px; padding:0 3px; margin-right:3px; vertical-align:middle; line-height:15px; letter-spacing:0.03em; }
   /* 使い方ガイド */
   .help-tab { padding:6px 14px; border-radius:var(--md-shape-sm) var(--md-shape-sm) 0 0; font-size:0.75rem; cursor:pointer; background:var(--md-surface-container); color:var(--md-on-surface-variant); border:1px solid var(--md-outline); border-bottom:1px solid var(--md-outline); margin-bottom:-1px; transition:all var(--md-duration-short) var(--md-ease); }
   .help-tab.active { background:var(--md-surface-container); color:var(--md-on-surface); border-bottom-color:var(--md-surface-container); }
@@ -419,6 +420,22 @@ function ensureChartJs() {
     <button onclick="openGraphModal()" style="padding:3px 10px;border-radius:var(--md-shape-sm);background:var(--md-surface-container-high);border:1px solid var(--md-outline);color:var(--md-on-surface-variant);cursor:pointer;font-size:12px;flex-shrink:0;transition:all var(--md-duration-short) var(--md-ease);align-self:stretch" title="グラフ分析">グラフ</button>
     <button class="text-xs text-gray-500 hover:text-blue-400" onclick="clearSearch()">✕</button>
     <span id="search-count" class="text-xs text-gray-600"></span>
+  </div>
+
+  <!-- 推定ソロ設定 -->
+  <div id="solo-bar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;padding:2px 0;margin-top:2px">
+    <label style="display:flex;align-items:center;gap:3px;color:var(--md-on-surface-variant);cursor:pointer;white-space:nowrap">
+      <input type="checkbox" id="solo-enabled" onchange="onSoloSettingChange()">
+      <span class="solo-mark" style="pointer-events:none">S</span>推定ソロ
+    </label>
+    <div id="solo-options" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:3px;color:var(--md-on-surface-variant);white-space:nowrap">
+        20分速<input id="solo-line" type="text" inputmode="numeric" style="width:100px;font-size:11px;padding:2px 4px;background:var(--md-surface-container-high);border:1px solid var(--md-outline);border-radius:4px;color:var(--md-on-surface);text-align:right" onchange="onSoloSettingChange()" onblur="formatSoloLineInput()">以上
+      </label>
+      <label style="display:flex;align-items:center;gap:3px;color:var(--md-on-surface-variant);white-space:nowrap">
+        討伐<input id="solo-max-kills" type="number" style="width:42px;font-size:11px;padding:2px 4px;background:var(--md-surface-container-high);border:1px solid var(--md-outline);border-radius:4px;color:var(--md-on-surface)" onchange="onSoloSettingChange()">以下
+      </label>
+    </div>
   </div>
 
   <!-- ランキングテーブル -->
@@ -860,7 +877,7 @@ function ensureChartJs() {
     </div>
     <div class="modal-body">
       <div id="modal-loading" class="text-gray-500 text-center py-10">読み込み中...</div>
-      <div id="modal-table-wrap" style="display:none;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%">
+      <div id="modal-table-wrap" style="display:none;width:100%">
         <table id="modal-table" class="modal-table">
           <thead>
             <tr>
@@ -906,6 +923,12 @@ let currentEventIsDemo = false;
 let currentEventDates  = { start: null, end: null };
 let playerSearchTerm   = '';
 let flashOnRender      = false;
+
+// 推定ソロ設定
+const _soloSaved = (() => { try { return JSON.parse(localStorage.getItem('gbf_solo') || '{}'); } catch { return {}; } })();
+let soloEnabled  = !!_soloSaved.enabled;
+let soloLine     = _soloSaved.line ?? 150000000;
+let soloMaxKills = _soloSaved.maxKills ?? 5;
 
 const BATTLE_COLORS    = ['#60a5fa','#fb923c','#4ade80','#c084fc','#f472b6','#facc15'];
 let battlePlayers      = [];
@@ -1008,6 +1031,36 @@ function getGBFPeriodName(capturedAt, eventStartDate) {
     : `${dayIdx + 1}日目`;
 
   return period;
+}
+
+// 推定ソロ判定
+function isSoloEstimate(p) {
+  if (!soloEnabled) return false;
+  return (p.honorDiff != null && p.honorDiff >= soloLine) &&
+         (p.killDiff != null && p.killDiff <= soloMaxKills);
+}
+function parseSoloLineInput() {
+  return Number(String(document.getElementById('solo-line').value).replace(/,/g, '')) || 150000000;
+}
+function formatSoloLineInput() {
+  const el = document.getElementById('solo-line');
+  const n = parseSoloLineInput();
+  el.value = n.toLocaleString('ja-JP');
+}
+function onSoloSettingChange() {
+  soloEnabled  = document.getElementById('solo-enabled').checked;
+  soloLine     = parseSoloLineInput();
+  soloMaxKills = Number(document.getElementById('solo-max-kills').value) || 5;
+  formatSoloLineInput();
+  document.getElementById('solo-options').style.display = soloEnabled ? 'flex' : 'none';
+  try { localStorage.setItem('gbf_solo', JSON.stringify({ enabled: soloEnabled, line: soloLine, maxKills: soloMaxKills })); } catch {}
+  if (currentRenderData) renderRanking(currentRenderData);
+}
+function initSoloUI() {
+  document.getElementById('solo-enabled').checked = soloEnabled;
+  document.getElementById('solo-line').value = soloLine.toLocaleString('ja-JP');
+  document.getElementById('solo-max-kills').value = soloMaxKills;
+  document.getElementById('solo-options').style.display = soloEnabled ? 'flex' : 'none';
 }
 
 let _searchTimer = null;
@@ -1288,6 +1341,7 @@ function updateSortIndicators() {
 async function init() {
   renderColgroup();
   renderThead();
+  initSoloUI();
 
   // 静的モード: ヘッダーホームリンク（タイトル → gbfranking.com）+ サブページリンクを更新
   if (window.__STATIC_MODE__) {
@@ -1896,7 +1950,8 @@ function renderRanking(data) {
     const gnCol  = bInfo ? ` style="color:${bInfo.color}"` : '';
     const histBtn = `<span style="cursor:pointer;color:var(--md-on-surface-variant);font-size:10px;margin-right:3px" onclick="event.stopPropagation();openPlayerModal(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))},${currentEventId})" title="履歴を見る">📋</span>`;
     const starBtn = `<button class="watch-star${watchedNames.has(p.username)?' on':''}" data-un="${escHtml(p.username)}" onclick="toggleWatch(event,${escHtml(JSON.stringify(p.username))})" title="${watchedNames.has(p.username)?'注目解除':'注目に追加'}">★</button>`;
-    const gnCell = `${markEl}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattlePlayer(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))})">${escHtml(p.username)}</span>${profileLink}${starBtn}`;
+    const soloMark = isSoloEstimate(p) ? '<span class="solo-mark" title="推定ソロ">S</span>' : '';
+    const gnCell = `${markEl}${soloMark}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattlePlayer(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))})">${escHtml(p.username)}</span>${profileLink}${starBtn}`;
 
     const cells = {
       honorRank:  `<td class="cell-r">${honorRank <= 3 ? `<span class="medal-${honorRank}">${honorRank}</span>` : honorRank}</td>`,
@@ -2485,6 +2540,16 @@ async function renderGraph() {
             borderTimeMap[lbl] = tierRows[i].honor;
           }
         }
+        // 期間増加モード: ボーダーも最初の値を0基準にオフセット
+        if (useRelative && yKey === 'honor') {
+          const firstKey = labels.find(l => borderTimeMap[l] != null);
+          if (firstKey != null) {
+            const base = borderTimeMap[firstKey];
+            for (const k of Object.keys(borderTimeMap)) {
+              borderTimeMap[k] -= base;
+            }
+          }
+        }
         const borderValues = allLabels.map(l => borderTimeMap[l] ?? null);
         const borderColor = '#fbbf24';
         datasets.push({
@@ -2607,6 +2672,7 @@ function shareGraph() {
     : '';
 
   const title = [
+    'ランキング',
     dateRange ? `${eventName}　(${dateRange})` : eventName,
     typeLabel,
     players,
