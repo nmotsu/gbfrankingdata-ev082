@@ -316,9 +316,11 @@ function ensureChartJs() {
   }
   :focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
 </style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
+<!-- AD_HEAD_SCRIPT -->
 <script src="/theme-manager.js?v=20260403"></script>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6139585433722718" crossorigin="anonymous"></script>
+<!-- admax -->
+<script src="https://adm.shinobi.jp/s/037c4a7216e66a7bda791fd7d05412d5"></script>
+<!-- admax -->
 </head>
 <body>
 
@@ -1037,32 +1039,45 @@ const SOLO_DIFFICULTIES_DEFAULT = [
   { name: '250HELL', honor: 75000000 },
 ];
 let SOLO_DIFFICULTIES = SOLO_DIFFICULTIES_DEFAULT.slice();
+let soloPctMin = 98;  // 貢献度一致範囲 下限（%）
+let soloPctMax = 101; // 貢献度一致範囲 上限（%）
 
 async function loadSoloDifficulties() {
-  if (window.__STATIC_MODE__) return; // 静的モードはデフォルト使用
+  if (window.__STATIC_MODE__) return;
   try {
     const r = await fetch('/api/ranking/solo-difficulties');
     if (r.ok) {
       const data = await r.json();
-      if (Array.isArray(data) && data.length) SOLO_DIFFICULTIES = data;
+      // 新形式 { difficulties, matchMinPct, matchMaxPct }
+      if (data && Array.isArray(data.difficulties) && data.difficulties.length) {
+        SOLO_DIFFICULTIES = data.difficulties;
+        soloPctMin = Number(data.matchMinPct) || 98;
+        soloPctMax = Number(data.matchMaxPct) || 101;
+      } else if (Array.isArray(data) && data.length) {
+        // 旧形式（配列）後方互換
+        SOLO_DIFFICULTIES = data;
+      }
     }
   } catch {}
 }
+
 // タブごとの計測時間（分）
 const TAB_DURATION_MIN = { '20min': 20, 'morning': 60, 'daily': 1020, 'overnight': 420 };
 
-// 貢献度/討伐数 がいずれかの難易度値の98〜101%に収まる場合、難易度名を返す
+// 貢献度/討伐数 がいずれかの難易度値の設定範囲内に収まる場合、難易度名を返す
 // 討伐数は「20分あたり」に換算してから閾値と比較（朝活・日速は時間が長い分、討伐数が増えるため）
 function getSoloMatch(p) {
   if (!soloEnabled) return null;
   if (currentTab === 'overnight') return null; // 残業はソロ不可
   if (p.honorDiff == null || p.killDiff == null || p.killDiff < 1) return null;
   const durationMin = TAB_DURATION_MIN[currentTab] ?? 20;
-  const killsPer20  = p.killDiff / (durationMin / 20); // 20分あたり討伐数に換算
+  const killsPer20  = p.killDiff / (durationMin / 20);
   if (killsPer20 > soloMaxKills) return null;
   const perKill = p.honorDiff / p.killDiff;
+  const lo = soloPctMin / 100;
+  const hi = soloPctMax / 100;
   for (const d of SOLO_DIFFICULTIES) {
-    if (perKill >= d.honor * 0.98 && perKill <= d.honor * 1.01) return d.name;
+    if (perKill >= d.honor * lo && perKill <= d.honor * hi) return d.name;
   }
   return null;
 }
