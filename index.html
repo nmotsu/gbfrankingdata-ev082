@@ -134,10 +134,6 @@ function ensureChartJs() {
   .flat { color: var(--md-on-surface-variant); }
   select, input { background: var(--md-surface-container-high); border: 1px solid var(--md-outline); color: var(--md-on-surface); border-radius: var(--md-shape-sm); padding: 6px 12px; font-size: 0.8125rem; transition: border-color var(--md-duration-short) var(--md-ease); }
   select:focus, input:focus { border-color: var(--md-primary); outline: 2px solid rgba(96,165,250,0.3); outline-offset: 1px; }
-  .live-badge { background: #14532d; color: var(--md-success); padding: 2px 8px; border-radius: var(--md-shape-full); font-size: 0.6875rem; }
-  @media (max-width: 599px) {
-    .live-badge { background: none; padding: 0; font-size: 0; width: 8px; height: 8px; border-radius: 50%; background-color: var(--md-success); flex-shrink: 0; box-shadow: 0 0 4px var(--md-success); }
-  }
   .demo-badge { background: var(--md-secondary-container); color: var(--md-on-primary-container); padding: 2px 8px; border-radius: var(--md-shape-full); font-size: 0.6875rem; }
   .loading { color: var(--md-on-surface-variant); text-align: center; padding: 48px; font-size: 0.875rem; }
   .no-data { color: var(--md-on-surface-variant); text-align: center; padding: 48px; }
@@ -337,7 +333,6 @@ function ensureChartJs() {
     </h1>
     <input id="date-select" type="date" onchange="onDateChange()" style="display:none">
     <span id="demo-badge" class="demo-badge" style="display:none">DEMO</span>
-    <span id="live-badge" class="live-badge" style="display:none">LIVE</span>
     <div class="hdr-right">
       <span id="viewer-badge" class="viewer-badge" style="display:none"></span>
       <a href="/border" class="hdr-btn hdr-btn-blue" id="border-header-link">ボーダー</a>
@@ -428,12 +423,10 @@ function ensureChartJs() {
       <input type="checkbox" id="solo-enabled" onchange="onSoloSettingChange()">
       <span class="solo-mark" style="pointer-events:none">S</span>推定ソロ
     </label>
-    <div id="solo-options" style="display:none;gap:6px;align-items:center;flex-wrap:wrap">
+    <div id="solo-options" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.55;white-space:nowrap">貢献度/討伐 が規定値の98〜101%</span>
       <label style="display:flex;align-items:center;gap:3px;color:var(--md-on-surface-variant);white-space:nowrap">
-        20分速<input id="solo-line" type="text" inputmode="numeric" style="width:100px;font-size:11px;padding:2px 4px;background:var(--md-surface-container-high);border:1px solid var(--md-outline);border-radius:4px;color:var(--md-on-surface);text-align:right" onchange="onSoloSettingChange()" onblur="formatSoloLineInput()">以上
-      </label>
-      <label style="display:flex;align-items:center;gap:3px;color:var(--md-on-surface-variant);white-space:nowrap">
-        討伐<input id="solo-max-kills" type="number" style="width:42px;font-size:11px;padding:2px 4px;background:var(--md-surface-container-high);border:1px solid var(--md-outline);border-radius:4px;color:var(--md-on-surface)" onchange="onSoloSettingChange()">以下
+        討伐<input id="solo-max-kills" type="number" min="1" style="width:42px;font-size:11px;padding:2px 4px;background:var(--md-surface-container-high);border:1px solid var(--md-outline);border-radius:4px;color:var(--md-on-surface);text-align:right" onchange="onSoloSettingChange()">以下
       </label>
     </div>
   </div>
@@ -926,8 +919,7 @@ let flashOnRender      = false;
 
 // 推定ソロ設定
 const _soloSaved = (() => { try { return JSON.parse(localStorage.getItem('gbf_solo') || '{}'); } catch { return {}; } })();
-let soloEnabled  = !!_soloSaved.enabled;
-let soloLine     = _soloSaved.line ?? 150000000;
+let soloEnabled  = _soloSaved.enabled !== false; // デフォルトON
 let soloMaxKills = _soloSaved.maxKills ?? 5;
 
 const BATTLE_COLORS    = ['#60a5fa','#fb923c','#4ade80','#c084fc','#f472b6','#facc15'];
@@ -1034,31 +1026,56 @@ function getGBFPeriodName(capturedAt, eventStartDate) {
 }
 
 // 推定ソロ判定
-function isSoloEstimate(p) {
-  if (!soloEnabled) return false;
-  return (p.honorDiff != null && p.honorDiff >= soloLine) &&
-         (p.killDiff != null && p.killDiff <= soloMaxKills);
+// 各難易度のソロ時1体あたり貢献度（サーバー設定またはフォールバック）
+const SOLO_DIFFICULTIES_DEFAULT = [
+  { name: 'EX+',     honor: 126000 },
+  { name: '90HELL',  honor: 305000 },
+  { name: '95HELL',  honor: 910000 },
+  { name: '100HELL', honor: 2680000 },
+  { name: '150HELL', honor: 4100000 },
+  { name: '200HELL', honor: 20000000 },
+  { name: '250HELL', honor: 75000000 },
+];
+let SOLO_DIFFICULTIES = SOLO_DIFFICULTIES_DEFAULT.slice();
+
+async function loadSoloDifficulties() {
+  if (window.__STATIC_MODE__) return; // 静的モードはデフォルト使用
+  try {
+    const r = await fetch('/api/ranking/solo-difficulties');
+    if (r.ok) {
+      const data = await r.json();
+      if (Array.isArray(data) && data.length) SOLO_DIFFICULTIES = data;
+    }
+  } catch {}
 }
-function parseSoloLineInput() {
-  return Number(String(document.getElementById('solo-line').value).replace(/,/g, '')) || 150000000;
+// タブごとの計測時間（分）
+const TAB_DURATION_MIN = { '20min': 20, 'morning': 60, 'daily': 1020, 'overnight': 420 };
+
+// 貢献度/討伐数 がいずれかの難易度値の98〜101%に収まる場合、難易度名を返す
+// 討伐数は「20分あたり」に換算してから閾値と比較（朝活・日速は時間が長い分、討伐数が増えるため）
+function getSoloMatch(p) {
+  if (!soloEnabled) return null;
+  if (currentTab === 'overnight') return null; // 残業はソロ不可
+  if (p.honorDiff == null || p.killDiff == null || p.killDiff < 1) return null;
+  const durationMin = TAB_DURATION_MIN[currentTab] ?? 20;
+  const killsPer20  = p.killDiff / (durationMin / 20); // 20分あたり討伐数に換算
+  if (killsPer20 > soloMaxKills) return null;
+  const perKill = p.honorDiff / p.killDiff;
+  for (const d of SOLO_DIFFICULTIES) {
+    if (perKill >= d.honor * 0.98 && perKill <= d.honor * 1.01) return d.name;
+  }
+  return null;
 }
-function formatSoloLineInput() {
-  const el = document.getElementById('solo-line');
-  const n = parseSoloLineInput();
-  el.value = n.toLocaleString('ja-JP');
-}
+function isSoloEstimate(p) { return getSoloMatch(p) !== null; }
 function onSoloSettingChange() {
   soloEnabled  = document.getElementById('solo-enabled').checked;
-  soloLine     = parseSoloLineInput();
   soloMaxKills = Number(document.getElementById('solo-max-kills').value) || 5;
-  formatSoloLineInput();
   document.getElementById('solo-options').style.display = soloEnabled ? 'flex' : 'none';
-  try { localStorage.setItem('gbf_solo', JSON.stringify({ enabled: soloEnabled, line: soloLine, maxKills: soloMaxKills })); } catch {}
+  try { localStorage.setItem('gbf_solo', JSON.stringify({ enabled: soloEnabled, maxKills: soloMaxKills })); } catch {}
   if (currentRenderData) renderRanking(currentRenderData);
 }
 function initSoloUI() {
   document.getElementById('solo-enabled').checked = soloEnabled;
-  document.getElementById('solo-line').value = soloLine.toLocaleString('ja-JP');
   document.getElementById('solo-max-kills').value = soloMaxKills;
   document.getElementById('solo-options').style.display = soloEnabled ? 'flex' : 'none';
 }
@@ -1339,6 +1356,7 @@ function updateSortIndicators() {
 }
 
 async function init() {
+  await loadSoloDifficulties();
   renderColgroup();
   renderThead();
   initSoloUI();
@@ -1590,16 +1608,42 @@ function clampDate(d) {
   return d;
 }
 
+let _viewerPollTimer = null;
+
+function updateViewerBadge(count) {
+  const el = document.getElementById('viewer-badge');
+  if (el) { el.textContent = `閲覧中 ${count}人`; el.style.display = ''; }
+}
+
+function fetchViewerCount() {
+  if (window.__STATIC_MODE__) return;
+  fetch('/api/viewers').then(r => r.ok ? r.json() : null).then(d => {
+    if (d && d.count != null) updateViewerBadge(d.count);
+  }).catch(() => {});
+}
+
+function startViewerPoll() {
+  if (_viewerPollTimer) return;
+  fetchViewerCount();
+  _viewerPollTimer = setInterval(fetchViewerCount, 30000);
+}
+
+function stopViewerPoll() {
+  if (_viewerPollTimer) { clearInterval(_viewerPollTimer); _viewerPollTimer = null; }
+}
+
 function connectLiveSSE() {
   if (currentEventIsDemo || window.__STATIC_MODE__) return;
+  // 即時ポーリングで同接数を取得（SSEが遅延・失敗した場合のフォールバック）
+  fetchViewerCount();
   if (liveSSE) liveSSE.close();
   liveSSE = new EventSource('/api/ranking/updates');
+  liveSSE.onopen = () => { stopViewerPoll(); };
   liveSSE.onmessage = (e) => {
     try {
       const info = JSON.parse(e.data);
       if (info.type === 'viewers') {
-        const el = document.getElementById('viewer-badge');
-        if (el) { el.textContent = `閲覧中 ${info.count}人`; el.style.display = ''; }
+        updateViewerBadge(info.count);
         return;
       }
       if (currentEventId && String(info.eventId) !== String(currentEventId)) return;
@@ -1612,6 +1656,8 @@ function connectLiveSSE() {
     } catch {}
   };
   liveSSE.onerror = () => {
+    // SSE失敗時はポーリングにフォールバック
+    startViewerPoll();
     setTimeout(connectLiveSSE, 10000);
   };
 }
@@ -1950,7 +1996,8 @@ function renderRanking(data) {
     const gnCol  = bInfo ? ` style="color:${bInfo.color}"` : '';
     const histBtn = `<span style="cursor:pointer;color:var(--md-on-surface-variant);font-size:10px;margin-right:3px" onclick="event.stopPropagation();openPlayerModal(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))},${currentEventId})" title="履歴を見る">📋</span>`;
     const starBtn = `<button class="watch-star${watchedNames.has(p.username)?' on':''}" data-un="${escHtml(p.username)}" onclick="toggleWatch(event,${escHtml(JSON.stringify(p.username))})" title="${watchedNames.has(p.username)?'注目解除':'注目に追加'}">★</button>`;
-    const soloMark = isSoloEstimate(p) ? '<span class="solo-mark" title="推定ソロ">S</span>' : '';
+    const _soloMatch = getSoloMatch(p);
+    const soloMark = _soloMatch ? `<span class="solo-mark" title="推定ソロ: ${_soloMatch}">S</span>` : '';
     const gnCell = `${markEl}${soloMark}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattlePlayer(${p.player_id ?? 'null'},${escHtml(JSON.stringify(p.username))})">${escHtml(p.username)}</span>${profileLink}${starBtn}`;
 
     const cells = {
@@ -2261,6 +2308,7 @@ function highlightGraphLine(name) {
   const hiPt = graphDayCount <= 2 ? 5 : 3;
   chartInstance.data.datasets.forEach(ds => {
     const isTarget = ds._playerName === name;
+    if (ds._isBorder) return; // ボーダー線はフォーカス時も常に通常表示
     ds.borderWidth     = isTarget ? 3.5 : 0.7;
     ds.borderColor     = isTarget ? ds._origColor : (ds._origColor || ds.borderColor) + '44';
     ds.pointRadius     = isTarget ? hiPt : 0;
@@ -2554,6 +2602,8 @@ async function renderGraph() {
         const borderColor = '#fbbf24';
         datasets.push({
           label: `ボーダー${TIER_LABELS_B[tierNum] || tierNum + '位'}`,
+          _origColor: borderColor,
+          _isBorder: true,
           data: borderValues,
           borderColor: borderColor,
           backgroundColor: 'transparent',
@@ -2730,11 +2780,6 @@ window.addEventListener('resize', updateTableHeight);
 init().then(() => updateTableHeight());
 </script>
 <script>
-(function(){
-  const h = location.hostname;
-  const isLive = !window.__STATIC_MODE__ && h !== 'localhost' && h !== '127.0.0.1';
-  if (isLive) document.getElementById('live-badge').style.display = '';
-})();
 
 // サイドバー折りたたみ
 function toggleSidePanel() {
