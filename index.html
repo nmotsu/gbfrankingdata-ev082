@@ -315,12 +315,13 @@ function ensureChartJs() {
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
   :focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
+  /* 広告スロット */
+  .ad-inline-wrap { text-align:center; padding:8px 0 4px; min-height:0; overflow:hidden; }
 </style>
-<!-- AD_HEAD_SCRIPT -->
-<script src="/theme-manager.js?v=20260403"></script>
 <!-- admax -->
 <script src="https://adm.shinobi.jp/s/037c4a7216e66a7bda791fd7d05412d5"></script>
 <!-- admax -->
+<script src="/theme-manager.js?v=20260403"></script>
 </head>
 <body>
 
@@ -451,6 +452,9 @@ function ensureChartJs() {
     </table>
     </div><!-- /overflow-x:auto -->
   </div>
+
+  <!-- 広告スロット（テーブル直下） -->
+  <div class="ad-inline-wrap"><script>(function(w){var d=document,s=d.createElement('script'),u=w.innerWidth>=768?'https://adm.shinobi.jp/s/1ef61e7be0d4a5ab7939b953e7b95fbb':'https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234';s.src=u;s.async=true;var c=d.currentScript||d.querySelector('.ad-inline-wrap:last-of-type');if(c&&c.parentNode)c.parentNode.appendChild(s);})(window);</script></div>
 
 </div><!-- /main-content -->
 
