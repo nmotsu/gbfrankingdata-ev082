@@ -262,16 +262,27 @@ function ensureChartJs() {
   #snap-selector { display:grid; grid-template-columns:auto 1fr auto auto; row-gap:4px; column-gap:4px; }
   #snap-selector > div { display:grid; grid-template-columns:subgrid; grid-column:1/-1; align-items:center; }
   #period-day-selector > div { display:flex; align-items:center; gap:4px; }
-  /* 全体レイアウト */
-  html, body { height: 100%; }
-  body { display: flex; flex-direction: column; overflow: hidden; }
-  .main-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-  .main-wrap > div:not(.table-card):not(#main-content):not(#side-panel) { flex-shrink: 0; }
-  .table-card { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-  #rank-table-wrap { flex: 1; min-height: 0; }
+  /* 全体レイアウト（ページスクロール方式） */
+  html, body { min-height: 100%; }
+  body { display: flex; flex-direction: column; }
+  .main-wrap { flex: 1; display: flex; flex-direction: column; }
+  .table-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #rank-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   #site-footer { flex-shrink: 0; }
   #stat-bar { flex-shrink:0; padding:6px 12px; border-bottom:1px solid var(--md-outline-variant); font-size:0.75rem; }
   .search-bar { margin-bottom: 4px; }
+  /* コントロール折りたたみ */
+  #ctrl-toggle-bar { display:none; justify-content:flex-end; align-items:center; padding:3px 6px 3px 8px; background:var(--md-surface-dim); border-bottom:1px solid var(--md-outline-variant); gap:6px; }
+  #ctrl-toggle-btn { background:none; border:none; cursor:pointer; color:var(--md-on-surface-variant); font-size:11px; padding:3px 8px; border-radius:var(--md-shape-sm); display:flex; align-items:center; gap:4px; transition:all var(--md-duration-short) var(--md-ease); }
+  #ctrl-toggle-btn:hover { background:rgba(255,255,255,0.07); color:var(--md-on-surface); }
+  #main-content.ctrl-collapsed #tab-grid,
+  #main-content.ctrl-collapsed #ctrl-area,
+  #main-content.ctrl-collapsed #battle-bar,
+  #main-content.ctrl-collapsed .search-bar,
+  #main-content.ctrl-collapsed #solo-bar { display:none !important; }
+  @media (max-width:1023px) {
+    #ctrl-toggle-bar { display:flex; }
+  }
   /* Compact (モバイル) */
   @media (max-width:599px) {
     .tab-sub { display: none; }
@@ -294,11 +305,11 @@ function ensureChartJs() {
   .graph-suggest-item:hover { background:rgba(255,255,255,0.05); }
   .graph-search-wrap { position:relative; display:inline-block; }
   /* ===== PC サイドバー ===== */
-  #main-content { flex: 1; min-width: 0; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  #main-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   #main-content > div:not(.table-card) { flex-shrink: 0; }
   @media (min-width: 1024px) {
-    .main-wrap { flex-direction: row !important; align-items: stretch; }
-    #side-panel { width: 218px; flex-shrink: 0; display: flex !important; flex-direction: column; gap: 8px; padding: 4px 0 4px 8px; overflow-y: auto; transition: width 0.25s var(--md-ease); overflow: hidden; }
+    .main-wrap { flex-direction: row !important; align-items: flex-start; }
+    #side-panel { width: 218px; flex-shrink: 0; display: flex !important; flex-direction: column; gap: 8px; padding: 4px 0 4px 8px; transition: width 0.25s var(--md-ease); position: sticky; top: 52px; max-height: calc(100vh - 52px); overflow-y: auto; }
     #side-panel.collapsed { width: 28px; padding: 4px 0; }
     #side-panel.collapsed .side-card { display: none; }
     #side-collapse-btn { display: flex !important; }
@@ -368,8 +379,15 @@ function ensureChartJs() {
 <div class="main-wrap" style="padding:4px 10px 4px;max-width:1536px;margin:0 auto;width:100%;box-sizing:border-box">
 
 <div id="main-content">
+  <!-- モバイル: コントロール折りたたみバー -->
+  <div id="ctrl-toggle-bar">
+    <span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.6" id="ctrl-toggle-label">タブ・設定</span>
+    <button id="ctrl-toggle-btn" onclick="toggleControls()" title="タブ・設定を収納">
+      <span id="ctrl-toggle-icon">▲</span><span id="ctrl-toggle-text">収納</span>
+    </button>
+  </div>
   <!-- タブ（常に1行4列） -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px">
+  <div id="tab-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px">
     <button class="tab-btn active" id="tab-20min" onclick="switchTab('20min')">20分速<span class="tab-sub">直前→最新</span></button>
     <button class="tab-btn" id="tab-morning" onclick="switchTab('morning')">朝活<span class="tab-sub">7:00→8:00</span></button>
     <button class="tab-btn" id="tab-daily" onclick="switchTab('daily')">日速<span class="tab-sub">7:00→0:00</span></button>
@@ -474,7 +492,7 @@ function ensureChartJs() {
   </div>
 
   <!-- 広告スロット（テーブル直下） -->
-  <div class="ad-inline-wrap"><script>(function(w){var d=document,s=d.createElement('script'),u=w.innerWidth>=768?'https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234':'https://adm.shinobi.jp/s/dda9c8d32b3d9a9cc2917d13771fa375';s.src=u;s.async=true;var c=d.currentScript||d.querySelector('.ad-inline-wrap:last-of-type');if(c&&c.parentNode)c.parentNode.appendChild(s);})(window);</script></div>
+  <div class="ad-inline-wrap"><script>(function(){var u=window.innerWidth>=768?'https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234':'https://adm.shinobi.jp/s/dda9c8d32b3d9a9cc2917d13771fa375';document.write('<scr'+'ipt src="'+u+'"><\/scr'+'ipt>');})();</script></div>
 
 </div><!-- /main-content -->
 
@@ -1172,6 +1190,29 @@ function onSoloSettingChange() {
   try { localStorage.setItem('gbf_solo', JSON.stringify({ enabled: soloEnabled, maxKills: soloMaxKills })); } catch {}
   if (currentRenderData) renderRanking(currentRenderData);
 }
+// ===== コントロール折りたたみ =====
+function toggleControls() {
+  const mc   = document.getElementById('main-content');
+  const icon = document.getElementById('ctrl-toggle-icon');
+  const text = document.getElementById('ctrl-toggle-text');
+  const collapsed = mc.classList.toggle('ctrl-collapsed');
+  if (icon) icon.textContent = collapsed ? '▼' : '▲';
+  if (text) text.textContent = collapsed ? '展開' : '収納';
+  try { localStorage.setItem('gbf_ctrl_collapsed', collapsed ? '1' : '0'); } catch {}
+}
+function initControlsState() {
+  try {
+    if (localStorage.getItem('gbf_ctrl_collapsed') === '1') {
+      const mc   = document.getElementById('main-content');
+      const icon = document.getElementById('ctrl-toggle-icon');
+      const text = document.getElementById('ctrl-toggle-text');
+      if (mc)   mc.classList.add('ctrl-collapsed');
+      if (icon) icon.textContent = '▼';
+      if (text) text.textContent = '展開';
+    }
+  } catch {}
+}
+
 function initSoloUI() {
   document.getElementById('solo-enabled').checked = soloEnabled;
   document.getElementById('solo-max-kills').value = soloMaxKills;
@@ -1765,6 +1806,7 @@ async function init() {
   renderColgroup();
   renderThead();
   initSoloUI();
+  initControlsState();
 
   // 静的モード: ヘッダーホームリンク（タイトル → gbfranking.com）+ サブページリンクを更新
   if (window.__STATIC_MODE__) {
