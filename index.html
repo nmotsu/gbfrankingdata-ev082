@@ -272,17 +272,16 @@ function ensureChartJs() {
   #stat-bar { flex-shrink:0; padding:6px 12px; border-bottom:1px solid var(--md-outline-variant); font-size:0.75rem; }
   .search-bar { margin-bottom: 4px; }
   /* コントロール折りたたみ */
-  #ctrl-toggle-bar { display:none; justify-content:flex-end; align-items:center; padding:3px 6px 3px 8px; background:var(--md-surface-dim); border-bottom:1px solid var(--md-outline-variant); gap:6px; }
+  #ctrl-toggle-bar { display:flex; justify-content:flex-end; align-items:center; padding:3px 6px 3px 8px; background:var(--md-surface-dim); border-bottom:1px solid var(--md-outline-variant); gap:6px; }
   #ctrl-toggle-btn { background:none; border:none; cursor:pointer; color:var(--md-on-surface-variant); font-size:11px; padding:3px 8px; border-radius:var(--md-shape-sm); display:flex; align-items:center; gap:4px; transition:all var(--md-duration-short) var(--md-ease); }
   #ctrl-toggle-btn:hover { background:rgba(255,255,255,0.07); color:var(--md-on-surface); }
-  #main-content.ctrl-collapsed #tab-grid,
-  #main-content.ctrl-collapsed #ctrl-area,
-  #main-content.ctrl-collapsed #battle-bar,
-  #main-content.ctrl-collapsed .search-bar,
-  #main-content.ctrl-collapsed #solo-bar { display:none !important; }
-  @media (max-width:1023px) {
-    #ctrl-toggle-bar { display:flex; }
-  }
+  #ctrl-toggle-arrow { display:inline-block; transition:transform 0.3s var(--md-ease); }
+  #main-content.ctrl-collapsed #ctrl-toggle-arrow { transform:rotate(180deg); }
+  /* アコーディオン: grid-template-rows で高さをスムーズに変化させる */
+  #ctrl-collapsible { display:grid; grid-template-rows:1fr; transition:grid-template-rows 0.3s var(--md-ease); }
+  #ctrl-collapsible > .ctrl-inner { min-height:0; overflow:hidden; opacity:1; transition:opacity 0.25s var(--md-ease); }
+  #main-content.ctrl-collapsed #ctrl-collapsible { grid-template-rows:0fr; }
+  #main-content.ctrl-collapsed #ctrl-collapsible > .ctrl-inner { opacity:0; }
   /* Compact (モバイル) */
   @media (max-width:599px) {
     .tab-sub { display: none; }
@@ -379,13 +378,17 @@ function ensureChartJs() {
 <div class="main-wrap" style="padding:4px 10px 4px;max-width:1536px;margin:0 auto;width:100%;box-sizing:border-box">
 
 <div id="main-content">
-  <!-- モバイル: コントロール折りたたみバー -->
+  <!-- 広告スロット（コンテンツ上部 / クローラー検出・ユーザー視認のため最上位に配置） -->
+  <div class="ad-inline-wrap"><style>.ad-slot-pc{display:none}.ad-slot-mb{display:none}@media(min-width:768px){.ad-slot-pc{display:block}}@media(max-width:767px){.ad-slot-mb{display:block}}</style><div class="ad-slot-pc"><script src="https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234"></script></div><div class="ad-slot-mb"><script src="https://adm.shinobi.jp/s/dda9c8d32b3d9a9cc2917d13771fa375"></script></div></div>
+  <!-- コントロール折りたたみバー -->
   <div id="ctrl-toggle-bar">
-    <span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.6" id="ctrl-toggle-label">タブ・設定</span>
-    <button id="ctrl-toggle-btn" onclick="toggleControls()" title="タブ・設定を収納">
-      <span id="ctrl-toggle-icon">▲</span><span id="ctrl-toggle-text">収納</span>
+    <span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.6">タブ・設定</span>
+    <button id="ctrl-toggle-btn" onclick="toggleControls()" title="タブ・設定を収納/展開">
+      <span id="ctrl-toggle-text">収納</span><span id="ctrl-toggle-arrow">▲</span>
     </button>
   </div>
+  <div id="ctrl-collapsible">
+  <div class="ctrl-inner">
   <!-- タブ（常に1行4列） -->
   <div id="tab-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px">
     <button class="tab-btn active" id="tab-20min" onclick="switchTab('20min')">20分速<span class="tab-sub">直前→最新</span></button>
@@ -471,6 +474,9 @@ function ensureChartJs() {
     </div>
   </div>
 
+  </div><!-- /ctrl-inner -->
+  </div><!-- /ctrl-collapsible -->
+
   <!-- ランキングテーブル -->
   <div class="card table-card overflow-hidden">
     <!-- 統計バー（テーブルカード内ヘッダー） -->
@@ -492,7 +498,7 @@ function ensureChartJs() {
   </div>
 
   <!-- 広告スロット（テーブル直下） -->
-  <div class="ad-inline-wrap"><script>(function(){var u=window.innerWidth>=768?'https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234':'https://adm.shinobi.jp/s/dda9c8d32b3d9a9cc2917d13771fa375';document.write('<scr'+'ipt src="'+u+'"><\/scr'+'ipt>');})();</script></div>
+  <div class="ad-inline-wrap"><style>.ad-slot-pc{display:none}.ad-slot-mb{display:none}@media(min-width:768px){.ad-slot-pc{display:block}}@media(max-width:767px){.ad-slot-mb{display:block}}</style><div class="ad-slot-pc"><script src="https://adm.shinobi.jp/s/68b6fdf00b66a6b4729a5bc9a71d6234"></script></div><div class="ad-slot-mb"><script src="https://adm.shinobi.jp/s/dda9c8d32b3d9a9cc2917d13771fa375"></script></div></div>
 
 </div><!-- /main-content -->
 
@@ -1192,11 +1198,10 @@ function onSoloSettingChange() {
 }
 // ===== コントロール折りたたみ =====
 function toggleControls() {
-  const mc   = document.getElementById('main-content');
-  const icon = document.getElementById('ctrl-toggle-icon');
-  const text = document.getElementById('ctrl-toggle-text');
+  const mc       = document.getElementById('main-content');
+  const text     = document.getElementById('ctrl-toggle-text');
   const collapsed = mc.classList.toggle('ctrl-collapsed');
-  if (icon) icon.textContent = collapsed ? '▼' : '▲';
+  // テキストのみ更新。矢印回転は CSS transition (#ctrl-toggle-arrow) が担当
   if (text) text.textContent = collapsed ? '展開' : '収納';
   try { localStorage.setItem('gbf_ctrl_collapsed', collapsed ? '1' : '0'); } catch {}
 }
@@ -1204,10 +1209,20 @@ function initControlsState() {
   try {
     if (localStorage.getItem('gbf_ctrl_collapsed') === '1') {
       const mc   = document.getElementById('main-content');
-      const icon = document.getElementById('ctrl-toggle-icon');
       const text = document.getElementById('ctrl-toggle-text');
-      if (mc)   mc.classList.add('ctrl-collapsed');
-      if (icon) icon.textContent = '▼';
+      // アニメーションなしで初期状態を適用
+      if (mc) {
+        mc.classList.add('ctrl-collapsed');
+        // 初回はトランジションを一時停止して瞬時に閉じる
+        const c = document.getElementById('ctrl-collapsible');
+        const i = c?.querySelector('.ctrl-inner');
+        if (c) c.style.transition = 'none';
+        if (i) i.style.transition = 'none';
+        requestAnimationFrame(() => {
+          if (c) c.style.transition = '';
+          if (i) i.style.transition = '';
+        });
+      }
       if (text) text.textContent = '展開';
     }
   } catch {}
