@@ -95,11 +95,9 @@ function ensureChartJs() {
   .hdr-btn:focus-visible { outline: 2px solid var(--md-primary); outline-offset: 2px; }
   .hdr-btn-blue { color: var(--md-primary); border-color: var(--md-primary-dim); font-weight: 600; }
   .hdr-btn-blue:hover { color: var(--md-on-primary-container); }
-  .hdr-btn-live { color: #4ade80; border-color: #16a34a; background: rgba(22,163,74,0.12); font-weight: 700; letter-spacing: 0.04em; animation: live-glow 2s ease-in-out infinite; }
-  .hdr-btn-live:hover { color: #86efac; background: rgba(22,163,74,0.2); }
-  .hdr-btn-live::before { content: '●'; font-size: 7px; margin-right: 4px; vertical-align: middle; animation: live-dot 1.2s ease-in-out infinite; }
-  @keyframes live-glow { 0%,100%{box-shadow:0 0 0 0 rgba(74,222,128,0.35)} 50%{box-shadow:0 0 8px 2px rgba(74,222,128,0.18)} }
-  @keyframes live-dot  { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .hdr-btn-live { color: #4ade80; border-color: #16a34a; background: rgba(22,163,74,0.12); font-weight: 600; gap: 4px; }
+  .hdr-btn-live:hover { color: #86efac; background: rgba(22,163,74,0.22); text-decoration: underline; }
+  .hdr-btn-live::after { content: ' ↗'; font-size: 0.75em; opacity: 0.8; pointer-events: none; }
   /* 注目プレイヤー (サイドバー) */
   .watch-star { background: none; border: none; cursor: pointer; color: var(--md-outline); font-size: 0.6875rem; padding: 0 2px; transition: color var(--md-duration-short) var(--md-ease); line-height: 1; vertical-align: middle; }
   .watch-star:hover { color: #d97706; }
