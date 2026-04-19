@@ -667,7 +667,7 @@ async function onSnapDayChange() {
     timeSel.disabled = false;
     timeSel.style.opacity = '';
     timeSel.innerHTML = '<option value="">-- この日の最新 --</option>';
-    const daySnaps = (snapGroups[day] || []).slice().reverse();
+    const daySnaps = (snapGroups[day] || []);
     for (const s of daySnaps) {
       const opt = document.createElement('option');
       opt.value = s.id;
@@ -768,6 +768,7 @@ async function reload() {
   lastData = data;
   renderTable(data);
   updateSideTopCard(data);
+  renderWatchPanel();
 }
 
 // ============================================================
@@ -964,13 +965,48 @@ function renderWatchPanel() {
   const listEl = document.getElementById('side-watch-list');
   if (!watchGuilds.length) { card.style.display = 'none'; return; }
   card.style.display = '';
-  listEl.innerHTML = watchGuilds.map(w => `
-    <div class="side-watch-row">
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:0.75rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escHtml(w.name)}</div>
+
+  const guilds = (lastData && lastData.guilds) ? lastData.guilds : [];
+  // 20分速順位で昇順、圏外は末尾
+  const sorted = [...watchGuilds].sort((a, b) => {
+    const ga = guilds.find(x => x.guild_id === a.id);
+    const gb = guilds.find(x => x.guild_id === b.id);
+    return (ga?.displayRank ?? Infinity) - (gb?.displayRank ?? Infinity);
+  });
+
+  const closeBtn = (w) => `<button onclick="toggleWatch(${w.id},'${escHtml(w.name)}')" style="background:none;border:none;color:var(--md-on-surface-variant);cursor:pointer;font-size:13px;padding:0 0 0 4px;line-height:1;flex-shrink:0;opacity:0.5;transition:opacity var(--md-duration-short) var(--md-ease)" onmouseenter="this.style.opacity='1';this.style.color='var(--md-error)'" onmouseleave="this.style.opacity='0.5';this.style.color='var(--md-on-surface-variant)'" title="削除">✕</button>`;
+
+  listEl.innerHTML = sorted.map(w => {
+    const g = guilds.find(x => x.guild_id === w.id);
+    if (!g) {
+      return `<div class="side-watch-row" style="flex-direction:column;padding:4px 0">
+        <div style="display:flex;align-items:center;gap:4px;width:100%;min-width:0">
+          <span style="flex:1;font-size:12px;color:var(--md-on-surface-variant);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.name)}</span>
+          <span style="font-size:10px;color:var(--md-on-surface-variant);opacity:0.5">圏外</span>
+          ${closeBtn(w)}
+        </div></div>`;
+    }
+    const spd = g.displayRank != null ? `${g.displayRank}位` : '';
+    let rankStr = '';
+    if (g.rank != null) {
+      let arrow = '';
+      if (g.prevRank && g.rank) {
+        const d = g.prevRank - g.rank;
+        if (d > 0) arrow = `<span style="color:#60a5fa">▲</span>`;
+        else if (d < 0) arrow = `<span style="color:#f87171">▼</span>`;
+      }
+      rankStr = `全体${numFmt(g.rank)}位${arrow}`;
+    }
+    const statsLine = [spd, rankStr].filter(Boolean).join('　');
+    return `<div class="side-watch-row" style="flex-direction:column;align-items:flex-start;gap:2px;padding:5px 0">
+      <div style="display:flex;align-items:center;gap:4px;width:100%;min-width:0">
+        <span style="flex:1;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.name)}</span>
+        ${g.scoreDiff > 0 ? `<span style="color:#4ade80;font-size:11px;flex-shrink:0">+${numFmt(g.scoreDiff)}</span>` : ''}
+        ${closeBtn(w)}
       </div>
-      <button onclick="toggleWatch(${w.id},'${escHtml(w.name)}')" style="background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);font-size:0.75rem;flex-shrink:0;">✕</button>
-    </div>`).join('');
+      <div style="font-size:10px;color:var(--md-on-surface-variant);line-height:1.5">${statsLine}</div>
+    </div>`;
+  }).join('');
 }
 
 // ============================================================
@@ -1375,6 +1411,34 @@ function shareGuildGraph() {
   a.href = canvas.toDataURL('image/png');
   a.click();
 }
+
+// ============================================================
+// キーボード操作（左右矢印でスナップ/日付移動）
+// ============================================================
+document.addEventListener('keydown', (e) => {
+  const gm = document.getElementById('guild-modal');
+  if (gm && gm.style.display !== 'none') {
+    if (e.key === 'Escape') closeGuildModal();
+    return;
+  }
+  const gr = document.getElementById('graph-modal');
+  if (gr && gr.style.display !== 'none') {
+    if (e.key === 'Escape') closeGraphModal();
+    return;
+  }
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    const dir = e.key === 'ArrowLeft' ? -1 : 1;
+    if (currentTab === '20min') {
+      shiftSnap(dir);
+    } else if (currentTab === 'daily') {
+      shiftDate(dir);
+    }
+  }
+});
 
 // ============================================================
 // 初期化実行
