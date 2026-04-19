@@ -92,7 +92,7 @@ function ensureChartJs() {
   .rank-row.top-2{border-left:4px solid #c0c0c0;box-shadow:inset 60px 0 20px -20px rgba(192,192,192,0.10);}
   .rank-row.top-3{border-left:4px solid #cd7c32;box-shadow:inset 60px 0 20px -20px rgba(205,124,50,0.10);}
   @keyframes row-flash{0%{background-color:var(--md-primary-container)}100%{background-color:transparent}}
-  .up{color:var(--md-primary);} .down{color:var(--md-error);} .flat{color:var(--md-on-surface-variant);} .new{color:var(--md-success);}
+  .up{color:#60a5fa;} .down{color:var(--md-error);} .flat{color:var(--md-on-surface-variant);} .new{color:var(--md-success);}
   /* Score bar */
   .score-cell{position:relative;}
   .score-bar-bg{position:absolute;left:0;top:0;bottom:0;border-radius:var(--md-shape-xs);opacity:0.15;pointer-events:none;}
@@ -115,11 +115,23 @@ function ensureChartJs() {
   .gn-pinned{font-weight:800;text-decoration:underline dotted;}
   .gn-profile-link{color:var(--md-on-surface-variant);font-size:0.625rem;text-decoration:none;margin-left:4px;transition:color var(--md-duration-short) var(--md-ease);vertical-align:middle;}
   .gn-profile-link:hover{color:var(--md-primary);}
-  /* ソート */
-  th.sortable{cursor:pointer;}
+  /* ソート & カラムリサイズ */
+  th.sortable{cursor:pointer;position:relative;}
   th.sortable:hover{color:var(--md-on-surface);}
   .sort-ind{font-size:0.5625rem;margin-left:2px;color:var(--md-on-surface-variant);}
-  .sort-ind.active{color:var(--md-primary);}
+  .sort-ind.asc{color:#60a5fa;}
+  .sort-ind.desc{color:var(--md-error);}
+  .col-resize-handle{position:absolute;right:-1px;top:0;width:9px;height:100%;cursor:col-resize;z-index:2;}
+  .col-resize-handle::after{content:'';position:absolute;right:1px;top:18%;bottom:18%;width:2px;background:var(--md-outline);border-radius:1px;transition:background var(--md-duration-short) var(--md-ease),top var(--md-duration-short) var(--md-ease),bottom var(--md-duration-short) var(--md-ease);pointer-events:none;}
+  .col-resize-handle:hover::after{background:var(--md-surface-bright);top:5%;bottom:5%;}
+  body.col-resizing{cursor:col-resize !important;}
+  body.col-resizing *{cursor:col-resize !important;user-select:none !important;}
+  body.col-resizing .col-resize-handle::after{background:var(--md-primary) !important;top:0 !important;bottom:0 !important;}
+  #rank-table{width:100%;table-layout:fixed;}
+  /* ドラッグ&ドロップ */
+  th.col-th[draggable="true"]{cursor:grab;}
+  th.col-th.dragging{opacity:0.4;cursor:grabbing;}
+  th.col-th.drop-target{background:var(--md-primary-dim) !important;color:#fff;}
   /* selects */
   select,input{background:var(--md-surface-container-high);border:1px solid var(--md-outline);color:var(--md-on-surface);border-radius:var(--md-shape-sm);padding:6px 12px;font-size:0.8125rem;transition:border-color var(--md-duration-short) var(--md-ease);}
   select:focus,input:focus{border-color:var(--md-primary);outline:2px solid rgba(96,165,250,0.3);}
@@ -317,15 +329,9 @@ function ensureChartJs() {
       <div id="loading-msg" class="loading">読み込み中...</div>
       <div id="no-data-msg" class="no-data" style="display:none;">データがありません</div>
       <table id="rank-table" style="display:none;min-width:500px">
+        <colgroup id="col-group"></colgroup>
         <thead>
-          <tr id="col-headers">
-            <th class="sortable" style="width:44px;text-align:center;" onclick="sortBy('displayRank')">表示順<span class="sort-ind active" id="si-displayRank">▲</span></th>
-            <th class="sortable" style="width:40px;text-align:center;" onclick="sortBy('rankDelta')">±<span class="sort-ind" id="si-rankDelta">⇅</span></th>
-            <th class="sortable" style="width:50px;text-align:center;" onclick="sortBy('rank')">順位<span class="sort-ind" id="si-rank">⇅</span></th>
-            <th class="sortable" style="min-width:180px;" onclick="sortBy('name')">団名<span class="sort-ind" id="si-name">⇅</span></th>
-            <th class="sortable" style="width:130px;text-align:right;" onclick="sortBy('scoreDiff')">スコア増加<span class="sort-ind" id="si-scoreDiff">⇅</span></th>
-            <th class="sortable" style="width:130px;text-align:right;" onclick="sortBy('score')">累計スコア<span class="sort-ind" id="si-score">⇅</span></th>
-          </tr>
+          <tr id="col-headers"></tr>
         </thead>
         <tbody id="rank-tbody"></tbody>
       </table>
@@ -470,6 +476,31 @@ let currentDate = '';
 let currentSnapId = null;
 let watchGuilds = JSON.parse(localStorage.getItem('guild_watch') || '[]');
 let lastData = null;
+
+// カラム定義 & 永続化
+const COL_DEFS = {
+  displayRank: { label: '順位',       width: 44,  align: 'center', sortKey: 'displayRank' },
+  rankDelta:   { label: '変動',       width: 44,  align: 'center', sortKey: 'rankDelta'   },
+  rank:        { label: '全体順位',   width: 62,  align: 'center', sortKey: 'rank'        },
+  name:        { label: 'GN',         width: 200, align: 'left',   sortKey: 'name'        },
+  scoreDiff:   { label: '増加量',     width: 130, align: 'right',  sortKey: 'scoreDiff'   },
+  score:       { label: '累計貢献度', width: 130, align: 'right',  sortKey: 'score'       },
+};
+let colOrder = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('guild_col_order') || 'null');
+    if (Array.isArray(saved) && saved.every(k => k in COL_DEFS) && saved.length === Object.keys(COL_DEFS).length) return saved;
+  } catch {}
+  return Object.keys(COL_DEFS);
+})();
+let colWidths = (() => {
+  try { return JSON.parse(localStorage.getItem('guild_col_widths') || '{}') || {}; } catch { return {}; }
+})();
+function saveColPrefs() {
+  localStorage.setItem('guild_col_order', JSON.stringify(colOrder));
+  localStorage.setItem('guild_col_widths', JSON.stringify(colWidths));
+}
+
 let chartInstance = null;
 let gChartType = 'speed';
 let scoreOrigin = 'abs';  // 'abs' | 'rel'
@@ -542,6 +573,10 @@ function applyElementTheme(eventName) {
 // 初期化
 // ============================================================
 async function init() {
+  // テーブル列を動的生成
+  renderColgroup();
+  renderThead();
+
   // 静的モード: キャッシュ読み込み待機 + ヘッダーナビを相対リンクへ付け替え
   if (window.__STATIC_MODE__) {
     if (window.__STATIC_CACHE_PROMISE__) { try { await window.__STATIC_CACHE_PROMISE__; } catch {} }
@@ -858,8 +893,8 @@ function renderTable(data) {
     let rankDeltaHtml = '<span class="flat">—</span>';
     if (g.prevRank != null && g.rank != null) {
       const d = g.prevRank - g.rank;
-      if (d > 0) rankDeltaHtml = `<span class="up">↑${d}</span>`;
-      else if (d < 0) rankDeltaHtml = `<span class="down">↓${Math.abs(d)}</span>`;
+      if (d > 0) rankDeltaHtml = `<span class="up">▲${d}</span>`;
+      else if (d < 0) rankDeltaHtml = `<span class="down">▼${Math.abs(d)}</span>`;
       else rankDeltaHtml = '<span class="flat">→</span>';
     } else if (g.prevRank == null) {
       rankDeltaHtml = '<span class="new">NEW</span>';
@@ -877,17 +912,15 @@ function renderTable(data) {
     const starBtn = `<button class="watch-star ${wOn?'on':''}" onclick="toggleWatch(${g.guild_id},'${escHtml(g.name)}')" title="${wOn?'注目解除':'注目'}">★</button>`;
     const gnCell = `${battleMark}${histBtn}<span class="gn-clickable${gnCls}"${gnCol} onclick="toggleBattleGuild(${g.guild_id},'${escHtml(g.name)}')">${escHtml(g.name)}</span>${profileLink}${starBtn}`;
 
-    return `<tr class="rank-row${rankCls}" style="${rowStyle}" data-gid="${g.guild_id}">
-      <td style="text-align:center;color:${rankColor};font-weight:${rankWeight};">${g.displayRank}</td>
-      <td style="text-align:center;font-size:0.6875rem;">${rankDeltaHtml}</td>
-      <td style="text-align:center;font-size:0.75rem;color:var(--md-on-surface-variant);">${g.rank != null ? numFmt(g.rank) : '-'}</td>
-      <td style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">${gnCell}</td>
-      <td class="score-cell" style="text-align:right;">
-        <div class="score-bar-bg" style="width:${barPct}%;background:var(--elem-color);"></div>
-        <span class="score-diff">${g.scoreDiff > 0 ? '+'+numFmt(g.scoreDiff) : g.scoreDiff === 0 ? '±0' : numFmt(g.scoreDiff)}</span>
-      </td>
-      <td style="text-align:right;color:var(--md-on-surface-variant);font-size:0.75rem;">${numFmt(g.score)}</td>
-    </tr>`;
+    const cells = {
+      displayRank: `<td style="text-align:center;color:${rankColor};font-weight:${rankWeight};">${g.displayRank}</td>`,
+      rankDelta:   `<td style="text-align:center;font-size:0.6875rem;">${rankDeltaHtml}</td>`,
+      rank:        `<td style="text-align:center;font-size:0.75rem;color:var(--md-on-surface-variant);">${g.rank != null ? numFmt(g.rank) : '-'}</td>`,
+      name:        `<td style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">${gnCell}</td>`,
+      scoreDiff:   `<td class="score-cell" style="text-align:right;"><div class="score-bar-bg" style="width:${barPct}%;background:var(--elem-color);"></div><span class="score-diff">${g.scoreDiff > 0 ? '+'+numFmt(g.scoreDiff) : g.scoreDiff === 0 ? '±0' : numFmt(g.scoreDiff)}</span></td>`,
+      score:       `<td style="text-align:right;color:var(--md-on-surface-variant);font-size:0.75rem;">${numFmt(g.score)}</td>`,
+    };
+    return `<tr class="rank-row${rankCls}" style="${rowStyle}" data-gid="${g.guild_id}">${colOrder.map(k => cells[k]).join('')}</tr>`;
   }).join('');
 
   tbody.innerHTML = html;
@@ -903,6 +936,117 @@ function clearSearch() {
 
 // ============================================================
 // ソート
+// ============================================================
+// カラムリサイズ
+// ============================================================
+let _resizingCol = null, _resizeStartX = 0, _resizeStartW = 0;
+function startColResize(e, key) {
+  e.preventDefault();
+  _resizingCol = key;
+  _resizeStartX = e.clientX;
+  const col = document.getElementById(`col-${key}`);
+  _resizeStartW = col ? col.offsetWidth : 100;
+  document.body.classList.add('col-resizing');
+  document.addEventListener('mousemove', _onColResizeMove);
+  document.addEventListener('mouseup',   _stopColResize);
+}
+function _onColResizeMove(e) {
+  if (!_resizingCol) return;
+  const newW = Math.max(30, _resizeStartW + (e.clientX - _resizeStartX));
+  const col = document.getElementById(`col-${_resizingCol}`);
+  if (col) col.style.width = newW + 'px';
+}
+function _stopColResize() {
+  if (_resizingCol) {
+    const col = document.getElementById(`col-${_resizingCol}`);
+    if (col) colWidths[_resizingCol] = col.offsetWidth;
+    saveColPrefs();
+  }
+  _resizingCol = null;
+  document.body.classList.remove('col-resizing');
+  document.removeEventListener('mousemove', _onColResizeMove);
+  document.removeEventListener('mouseup',   _stopColResize);
+}
+
+// ============================================================
+// ヘッダー動的生成 + ドラッグ並び替え
+// ============================================================
+function renderColgroup() {
+  const cg = document.getElementById('col-group');
+  cg.innerHTML = colOrder.map(key => {
+    const def = COL_DEFS[key];
+    const w = colWidths[key] != null ? colWidths[key] : def.width;
+    return `<col id="col-${key}" style="width:${w}px">`;
+  }).join('');
+}
+function renderThead() {
+  const tr = document.getElementById('col-headers');
+  tr.innerHTML = colOrder.map((key, i) => {
+    const def = COL_DEFS[key];
+    const isActive = def.sortKey === sortKey;
+    const siText = isActive ? (sortDir === -1 ? '▼' : '▲') : '⇅';
+    const siCls  = isActive ? (sortDir === 1 ? 'sort-ind asc' : 'sort-ind desc') : 'sort-ind';
+    const alignSt = def.align === 'right' ? 'text-align:right;' : (def.align === 'center' ? 'text-align:center;' : '');
+    return `<th class="sortable col-th" style="${alignSt}" data-col="${key}" data-colidx="${i}" draggable="true">${def.label}<span id="si-${key}" class="${siCls}">${siText}</span><div class="col-resize-handle"></div></th>`;
+  }).join('');
+
+  tr.querySelectorAll('th.col-th').forEach(th => {
+    const key = th.dataset.col;
+    const def = COL_DEFS[key];
+    th.addEventListener('click', (e) => {
+      if (e.target.closest('.col-resize-handle') || _dragOccurred) return;
+      sortBy(def.sortKey);
+    });
+    th.addEventListener('dragstart', _onColDragStart);
+    th.addEventListener('dragover',  _onColDragOver);
+    th.addEventListener('dragleave', _onColDragLeave);
+    th.addEventListener('drop',      _onColDrop);
+    th.addEventListener('dragend',   _onColDragEnd);
+    const handle = th.querySelector('.col-resize-handle');
+    handle.addEventListener('mousedown', (e) => { e.stopPropagation(); startColResize(e, key); });
+    handle.addEventListener('click',     (e) => e.stopPropagation());
+  });
+}
+let _dragSrcIdx = null;
+let _dragOccurred = false;
+function _onColDragStart(e) {
+  _dragSrcIdx = parseInt(e.currentTarget.dataset.colidx);
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+function _onColDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('#col-headers th').forEach(th => th.classList.remove('drop-target'));
+  e.currentTarget.classList.add('drop-target');
+}
+function _onColDragLeave(e) {
+  e.currentTarget.classList.remove('drop-target');
+}
+function _onColDrop(e) {
+  e.preventDefault();
+  const targetIdx = parseInt(e.currentTarget.dataset.colidx);
+  document.querySelectorAll('#col-headers th').forEach(th => { th.classList.remove('drop-target'); th.classList.remove('dragging'); });
+  if (_dragSrcIdx != null && _dragSrcIdx !== targetIdx) {
+    const newOrder = [...colOrder];
+    const [moved] = newOrder.splice(_dragSrcIdx, 1);
+    newOrder.splice(targetIdx, 0, moved);
+    colOrder = newOrder;
+    saveColPrefs();
+    renderColgroup();
+    renderThead();
+    if (lastData) renderTable(lastData);
+  }
+  _dragSrcIdx = null;
+}
+function _onColDragEnd(e) {
+  e.currentTarget.classList.remove('dragging');
+  document.querySelectorAll('#col-headers th').forEach(th => th.classList.remove('drop-target'));
+  _dragOccurred = true;
+  setTimeout(() => { _dragOccurred = false; }, 200);
+  _dragSrcIdx = null;
+}
+
 // ============================================================
 function sortBy(key) {
   if (sortKey === key) { sortDir = -sortDir; }
@@ -929,7 +1073,7 @@ function updateSortIndicators() {
     const el = document.getElementById(`si-${k}`);
     if (!el) return;
     const isActive = k === sortKey;
-    el.className = `sort-ind${isActive ? ' active' : ''}`;
+    el.className = isActive ? (sortDir === 1 ? 'sort-ind asc' : 'sort-ind desc') : 'sort-ind';
     el.textContent = isActive ? (sortDir === -1 ? '▼' : '▲') : '⇅';
   });
 }
