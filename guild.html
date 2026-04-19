@@ -678,13 +678,53 @@ async function onSnapDayChange() {
   currentSnapId = null; timeSel.value = '';
   await reload();
 }
-function shiftSnap(delta) {
+function shiftSnap(dir) {
+  // dashboard と同じ方向: ArrowLeft(dir=-1)=古い方へ / ArrowRight(dir=+1)=新しい方へ
+  // allGuildSnaps は captured_at DESC（index 0 が最新）
+  if (!allGuildSnaps || !allGuildSnaps.length) return;
+  let curIdx = -1;
+  if (currentSnapId) {
+    curIdx = allGuildSnaps.findIndex(s => s.id === currentSnapId);
+  }
+  // currentSnapId 未設定（最新自動）→ index 0 扱い
+  if (dir === -1) {
+    // 古い方向へ
+    if (curIdx === -1) {
+      selectSnapByGlobalIdx(1); // 最新自動 → ひとつ古いスナップ
+    } else if (curIdx < allGuildSnaps.length - 1) {
+      selectSnapByGlobalIdx(curIdx + 1);
+    }
+  } else {
+    // 新しい方向へ
+    if (curIdx <= 0) {
+      // すでに最新 → 最新自動へ戻す
+      clearSnapSelect();
+    } else {
+      selectSnapByGlobalIdx(curIdx - 1);
+    }
+  }
+}
+function selectSnapByGlobalIdx(globalIdx) {
+  if (globalIdx < 0 || globalIdx >= allGuildSnaps.length) return;
+  const snap = allGuildSnaps[globalIdx];
+  const day = getGBFDay(snap.captured_at);
+  const daySel = document.getElementById('snap-day-select');
   const timeSel = document.getElementById('snap-time-select');
-  const opts = Array.from(timeSel.options).filter(o => o.value !== '');
-  const cur = timeSel.value;
-  const idx = opts.findIndex(o => o.value === cur);
-  let next = idx < 0 ? (delta < 0 ? opts[0] : opts[opts.length - 1]) : opts[idx + delta];
-  if (next) { timeSel.value = next.value; onSnapTimeChange(); }
+  if (daySel.value !== day) {
+    daySel.value = day;
+    timeSel.disabled = false;
+    timeSel.style.opacity = '';
+    timeSel.innerHTML = '<option value="">-- この日の最新 --</option>';
+    for (const s of (snapGroups[day] || [])) {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = s.captured_at.substring(11, 16) + ` (${s.guild_count}団)`;
+      timeSel.appendChild(opt);
+    }
+  }
+  timeSel.value = String(snap.id);
+  currentSnapId = snap.id;
+  reload();
 }
 function onSnapTimeChange() {
   currentSnapId = document.getElementById('snap-time-select').value
