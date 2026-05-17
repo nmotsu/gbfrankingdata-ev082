@@ -25,8 +25,9 @@ window.__STATIC_CACHE_PROMISE__=fetch('./../guild-data.json.gz')
   })
   .catch(function(e){window.__STATIC_CACHE__={};console.warn('GBF: データ読み込み失敗',e);});
 </script>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="/css/layout.css">
+<link rel="stylesheet" href="/css/sidebar.css">
+<link rel="stylesheet" href="/css/tiers.css">
 <script>
 let _chartJsLoaded = false;
 function ensureChartJs() {
@@ -142,7 +143,7 @@ function ensureChartJs() {
   /* ドラッグ&ドロップ */
   th.col-th[draggable="true"]{cursor:grab;}
   th.col-th.dragging{opacity:0.4;cursor:grabbing;}
-  th.col-th.drop-target{background:var(--md-primary-dim) !important;color:#fff;}
+  th.col-th.drop-target{background:#1e40af !important;color:#fff;}
   /* selects */
   select,input{background:var(--md-surface-container-high);border:1px solid var(--md-outline);color:var(--md-on-surface);border-radius:var(--md-shape-sm);padding:6px 12px;font-size:0.8125rem;transition:border-color var(--md-duration-short) var(--md-ease);}
   select:focus,input:focus{border-color:var(--md-primary);outline:2px solid rgba(96,165,250,0.3);}
@@ -166,7 +167,7 @@ function ensureChartJs() {
   .modal-table tr:hover td{background:rgba(255,255,255,0.05);}
   /* Graph chart buttons */
   .gchart-type-btn{padding:6px 12px;font-size:0.75rem;border-radius:var(--md-shape-sm);border:1px solid var(--md-outline);background:var(--md-surface-container-high);color:var(--md-on-surface-variant);cursor:pointer;transition:all var(--md-duration-short) var(--md-ease);}
-  .gchart-type-btn.active{background:var(--md-primary-dim);color:#fff;border-color:var(--md-primary-dim);box-shadow:var(--md-elevation-1);}
+  .gchart-type-btn.active{background:#1e40af;color:#fff;border-color:#1e40af;box-shadow:var(--md-elevation-1);}
   .gchart-type-btn:hover:not(.active){background:var(--md-surface-bright);}
   /* Battle bar */
   .battle-bar{display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--md-surface-dim);border-bottom:1px solid var(--md-outline);flex-wrap:wrap;}
@@ -174,7 +175,7 @@ function ensureChartJs() {
   .battle-tag .bt-close{cursor:pointer;opacity:0.6;margin-left:3px;font-size:0.625rem;line-height:1;transition:opacity var(--md-duration-short) var(--md-ease);}
   .battle-tag .bt-close:hover{opacity:1;}
   .battle-filter-btn{padding:4px 10px;border-radius:var(--md-shape-sm);font-size:0.75rem;cursor:pointer;background:var(--md-secondary-container);color:var(--md-on-primary-container);border:1px solid rgba(96,165,250,0.3);transition:all var(--md-duration-short) var(--md-ease);}
-  .battle-filter-btn.active{background:var(--md-primary-dim);color:#fff;border-color:var(--md-primary-dim);}
+  .battle-filter-btn.active{background:#1e40af;color:#fff;border-color:#1e40af;}
   .battle-row-mark{display:inline-block;width:3px;height:13px;border-radius:2px;margin-right:4px;vertical-align:middle;}
   /* Ctrl toggle */
   #ctrl-toggle-bar{display:flex;justify-content:flex-end;align-items:center;padding:3px 6px 3px 8px;background:var(--md-surface-dim);border-bottom:1px solid var(--md-outline-variant);gap:6px;}
@@ -1097,7 +1098,8 @@ function renderTable(data) {
       scoreDiff:   `<td class="score-cell" style="text-align:right;"><div class="score-bar-bg" style="width:${barPct}%;background:var(--elem-color);"></div><span class="score-diff">${g.scoreDiff > 0 ? '+'+numFmt(g.scoreDiff) : g.scoreDiff === 0 ? '±0' : numFmt(g.scoreDiff)}</span></td>`,
       score:       `<td style="text-align:right;color:var(--md-on-surface-variant);font-size:0.75rem;">${numFmt(g.score)}</td>`,
     };
-    return `<tr class="rank-row${rankCls}" style="${rowStyle}" data-gid="${g.guild_id}">${colOrder.map(k => cells[k]).join('')}</tr>`;
+    const tierCls = !bInfo ? ` ${getTierClass(g.rank)}` : '';
+    return `<tr class="rank-row${rankCls}${tierCls}" style="${rowStyle}" data-gid="${g.guild_id}">${colOrder.map(k => cells[k]).join('')}</tr>`;
   }).join('');
 
   tbody.innerHTML = html;
@@ -1260,6 +1262,16 @@ function rowBg(displayRank, displayIdx) {
   if (displayRank === 3) return '#261400';
   if (displayIdx % 2 === 0) return 'transparent';
   return 'rgba(255,255,255,0.04)';
+}
+
+function getTierClass(rank) {
+  if (!rank || rank <= 0) return '';
+  if (rank <= 10)   return 'tier-top10';
+  if (rank <= 100)  return 'tier-top100';
+  if (rank <= 500)  return 'tier-top500';
+  if (rank <= 1000) return 'tier-top1000';
+  if (rank <= 2500) return 'tier-top2500';
+  return '';
 }
 
 // ============================================================
