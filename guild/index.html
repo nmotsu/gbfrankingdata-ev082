@@ -796,7 +796,12 @@ async function init() {
     sel.value = savedEvent;
   } else if (loadedEvents.length) {
     const active = loadedEvents.find(e => e.active) || loadedEvents[0];
-    sel.value = active.id;
+    const todayStr = new Date().toLocaleDateString('sv-SE');
+    const isFutureActive = active?.start_date && active.start_date > todayStr;
+    const fallback = isFutureActive
+      ? (loadedEvents.find(e => !e.start_date || e.start_date <= todayStr) || active)
+      : active;
+    sel.value = fallback.id;
   }
 
   renderWatchPanel();
