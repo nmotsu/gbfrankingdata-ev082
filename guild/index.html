@@ -758,6 +758,16 @@ async function init() {
     if (logoEl)    logoEl.setAttribute('href', './');
     if (rankEl)    rankEl.setAttribute('href', window.__STATIC_RANKING_LATEST_URL__ || './index.html');
     if (borderEl && window.__STATIC_BORDER_URL__) borderEl.setAttribute('href', window.__STATIC_BORDER_URL__);
+    // meta.json から動的上書き（古いエクスポートのリンク修正）
+    if (window.__STATIC_INDEX_URL__) {
+      fetch(window.__STATIC_INDEX_URL__ + 'meta.json', { cache: 'no-cache' })
+        .then(r => r.ok ? r.json() : null)
+        .then(meta => {
+          if (!meta) return;
+          if (borderEl && meta.border_url)          borderEl.setAttribute('href', meta.border_url);
+          if (rankEl   && meta.ranking_latest_url)  rankEl.setAttribute('href', meta.ranking_latest_url);
+        }).catch(() => {});
+    }
   }
 
   const events = await apiFetch('/api/guild/events', 300000);
